@@ -382,6 +382,10 @@ Input_files=regexp(fileread(Input_audname),'[\n\r]+','split');
 Input_files_temp=Input_files(cellfun('length',Input_files)>0);
 NoNull = find(~strcmp(Input_files_temp, 'NULL'));
 
+% load words table
+trials_words_file = [filepath, filesep, 'sub-',expParams.subject, '_ses-',num2str(expParams.session), '_run-',num2str(expParams.run), '_task-',expParams.task, '_trials-words.tsv'];
+trials_words = readtable(trials_words_file,'FileType','text');
+
 if ispc
     Input_files=arrayfun(@(x)fullfile(expParams.audiopath, expParams.task, strcat(strrep(x, '/', '\'), '.wav')), Input_files_temp);
 else
@@ -527,12 +531,20 @@ for itrial = 1:expParams.numTrials
 
     set(annoStr.Plus, 'Visible','on');
     
-    % set up trial (see subfunction at end of script)
-    %[trialData, annoStr] = setUpTrial(expParams, annoStr, stimName, condition, trialData, ii);
-    % print progress to window
-    fprintf(['\nRun ', num2str(expParams.run), ', trial', num2str(itrial), '/' num2str(expParams.numTrials), '\n'...
-        '    As you finish asking this trial''s question, please press Spacebar  to start the '...
-        num2str(anticipation_dur_sec), ' second anticipation period']);
+    % print current and upcoming stimulus questions 
+    % print trial number and total trials
+    if itrial ~= expParams.numTrials % if not last trial
+        next_trial_string = ['\n      Next trials question/word will be: ''', trials_words.question{itrial+1}, ''' /// ''', trials_words.word{itrial+1}, ''''];
+    elseif itrial == expParams.numTrials % if last trial
+        next_trial_string = '';
+    end
+    fprintf([...
+        '\nThis trial''s stimulus question: ''', trials_words.question{itrial}, '''', ...
+        '\n      Answer = ''',trials_words.word{itrial}, '''',...
+        '\n      ........ Trial ', num2str(itrial), '/' num2str(expParams.numTrials), ', Run ', num2str(expParams.run), ...
+        next_trial_string,...
+        '\n      As you finish asking this trial''s question, please press Spacebar to start the ', num2str(anticipation_dur_sec), ' second anticipation period',...
+        '\n']);
 
     % % % % % % % if (mod(itrial,ntrials_between_breaks) == 0) && (itrial ~= expParams.numTrials)  % Break after every X trials  , but not on the last
     % % % % % % %     pause()
@@ -544,7 +556,7 @@ for itrial = 1:expParams.numTrials
     pause()
 
     pause(anticipation_dur_sec - experimenter_warning_latency_sec) % anticipation delay period
-    fprintf(['\nGO cue will appear in ' num2str(experimenter_warning_latency_sec) ' seconds. Please look toward the subject now.'])
+    fprintf(['\nGO cue will appear in ' num2str(experimenter_warning_latency_sec) ' seconds. Please look toward the subject now.\n'])
     pause(experimenter_warning_latency_sec) 
 
     
