@@ -935,7 +935,9 @@ while EndWin <= length(samples)
     
     % increment analysis window and iteration by 1 (until voice onset detected)
     BegWin = BegWin + Incr;          
-    EndWin = EndWin + Incr;                
+    EndWin = EndWin + Incr;
+
+    % pause(12)
 end
 
 end
