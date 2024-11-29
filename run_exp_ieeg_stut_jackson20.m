@@ -1,4 +1,4 @@
-function run_exp_ieeg_stut_jackson2020(varargin)
+function run_exp_ieeg_stut_jackson20(varargin)
 close all;
 
 CMRR = true;
@@ -84,7 +84,7 @@ experimenter_warning_latency_sec = 0.8; % warn experimenter this soon before the
 
 ntrials_between_breaks = 34; %%%% not currently implemented, because experimenter has control of pausing at every trial
 
-manually_choose_config_file = 0; % if false, use default config file C:\docs\code\ieeg_stut\config\ieeg_stut_jackson2020.json
+manually_choose_config_file = 0; % if false, use default config file C:\docs\code\ieeg_stut\config\ieeg_stut_jackson20.json
 
 ortho_font_size = 70; % not currently used - no orthography
 
@@ -178,7 +178,7 @@ if manually_choose_config_file
     
     delete(presfig);
 elseif ~manually_choose_config_file
-    expRead = spm_jsonread('C:\docs\code\ieeg_stut\config\ieeg_stut_jackson2020.json'); % default config file
+    expRead = spm_jsonread('C:\docs\code\ieeg_stut\config\ieeg_stut_jackson20.json'); % default config file
     preFlag = true; 
 end
 
