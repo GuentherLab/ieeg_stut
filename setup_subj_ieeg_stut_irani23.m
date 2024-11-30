@@ -21,9 +21,11 @@ nmaster = height(word_master_list);
 master_remain = word_master_list; % words that haven't been used yet
 
 ntrials = op.ntrials;
+cel1 = cell(ntrials,1); 
 cel2 = cell(ntrials,2);
 trials = table(cel2,'VariableNames',{'word'});
 trials.first_letter = cel2; 
+trials.fullstim = cell1; 
 
 
 for itrial = 1:ntrials
@@ -51,6 +53,8 @@ for itrial = 1:ntrials
     trials.word{itrial,2} = master_remain.word{randind}; 
     trials.first_letter{itrial,2} = master_remain.first_letter{randind}; 
     master_remain(randind,:) = []; % remove word now that it's been used
+
+    trials.fullstim{itrial} = [trials.word{itrial,1}, ' ', trials.word{itrial,2}]; 
 end
 
 stimops = op; 

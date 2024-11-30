@@ -1,4 +1,8 @@
-function run_exp_ieeg_stut_jackson20(varargin)
+% run stuttering elicitation protocol adapted from: 
+%%% Irani et al., 2023 - https://doi.org/10.1016/j.jcomdis.2023.106353 
+%
+% stimulus script adapted from Guenther Lab FLVoice package
+
 close all;
 
 CMRR = true;
@@ -6,9 +10,9 @@ CMRR = true;
 % set priority for matlab to high for running experiments
 system(sprintf('wmic process where processid=%d call setpriority "high priority"', feature('getpid')));
 
-beepoffset = 0.100;
 
-%%%%%%%%%%%%%%% comments below mostly apply to original FLVoice_run script, not jackson20 protocol
+
+%%%%%%%%%%%%%%% comments below mostly apply to original FLVoice_run script, not irani23 protocol
 
 % FLVOICE_RUN runs audio recording&scanning session
 % [task]: 'train' or 'test'
@@ -23,8 +27,7 @@ beepoffset = 0.100;
 %
 % OUTPUT:
 %    [root]/sub-[subject]/ses-[session]/beh/[task]/sub-[subject]_ses-[session]_run-[run]_task-[task]_desc-audio.mat        : OUTPUT audio data (see FLVOICE_IMPORT for format details) 
-%
-%
+% 
 %
 % FLVOICE_RUN(option_name1, option_value1, ...)
 % specifies additional options:
@@ -60,16 +63,31 @@ beepoffset = 0.100;
 
 show_mic_trace_figure = 0; % if false, make mic trace figure invisible
         
-anticipation_dur_sec = 5; % wait period between experimenter finishing question and playing of the GO beep and green screen
-experimenter_warning_latency_sec = 0.8; % warn experimenter this soon before the screen turns green
+op.get_ready_stim_dur = 1; % duration in sec of the visual stimulus occurring before speech onset
 
-ntrials_between_breaks = 34; %%%% not currently implemented, because experimenter has control of pausing at every trial
+op.prespeech_delay_dur = 0.5; % time in sec between offset of get-ready visual stim and the GO stim triggering speech onset
 
-manually_choose_config_file = 0; % if false, use default config file C:\docs\code\ieeg_stut\config\ieeg_stut_jackson20.json
+op.go_stim_dur = 4.5; % duration in sec of visual cue instructing speech onset
 
-ortho_font_size = 70; % not currently used - no orthography
+%%%%%%%%%%%% stimulus paradigm - see irani ea 2023, fig 1
+op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
+% op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
+
+
+op.ntrials = 100; 
+op.allow_same_first_letter_within_pair = 0; 
+op.word_list_master_filename = 'C:\docs\code\ieeg_stut\stimuli\irani23_word_list_master.tsv'; 
+
+
+op.ortho_font_size = 70; 
+
+op.ntrials_between_breaks = 34; %%%% not currently implemented
+
 
 pause('on') % enable to use of pause.m to hold code execution until keypress
+
+%% generate trial stim list
+[trials] = setup_subj_ieeg_stut_irani23(op)
 
 %% audio device setup
 [~,computername] = system('hostname'); % might not work on non-windows machines
@@ -123,45 +141,8 @@ end
 preFlag = false;
 expRead = {};
 
-%% functions for manually choosing config file
-function preCall1(varargin)
-    [fileName, filePath] = uigetfile('./config/*.json', 'Select .json file');
-    fileFull = [filePath fileName];
-    if isequal(fileName,0)
-        return
-    else
-        set(prePath, 'String', fileFull);
-    end
-end
 
-function preCall2(varargin)
-    path = get(prePath, 'String');
-    assert(~isempty(dir(path)), 'unable to find input file %s',path);
-    if ~isempty(dir(path))
-        expRead=spm_jsonread(path);
-        uiresume;
-        preFlag = true;
-    end
-end
 %%
-
-if manually_choose_config_file
-    presfig=dialog('units','norm','position',[.3,.3,.3,.1],'windowstyle','normal','name','Load preset parameters','color','w','resize','on');
-    uicontrol(presfig,'style','text','units','norm','position',[.05, .475, .6, .35],'string','Select preset exp config file (.json):','backgroundcolor','w','fontsize',default_fontsize-2,'fontweight','bold','horizontalalignment','left');
-    prePath=uicontrol('Style', 'edit','Units','norm','FontUnits','norm','FontSize',0.5,'HorizontalAlignment', 'left','Position',[.55 .55 .3 .3],'Parent',presfig);
-    preBrowse=uicontrol('Style', 'pushbutton','String','Browse','Units','norm','FontUnits','norm','FontSize',0.5,'Position',[.85 .55 .15 .3],'Parent',presfig, 'Callback',@preCall1);
-    preConti=uicontrol('Style', 'pushbutton','String','Continue','Units','norm','FontUnits','norm','FontSize',0.5,'Position',[.3 .12 .15 .3],'Parent',presfig, 'Callback',@preCall2);
-    preSkip=uicontrol('Style', 'pushbutton','String','Skip','Units','norm','FontUnits','norm','FontSize',0.5,'Position',[.55 .12 .15 .3],'Parent',presfig, 'Callback','uiresume');
-    
-    uiwait(presfig);
-    ok=ishandle(presfig);
-    if ~ok, return; end
-    
-    delete(presfig);
-elseif ~manually_choose_config_file
-    expRead = spm_jsonread('C:\docs\code\ieeg_stut\config\ieeg_stut_jackson20.json'); % default config file
-    preFlag = true; 
-end
 
 
 
@@ -341,7 +322,7 @@ if strcmp(expParams.visual, 'figure')
 else
     annoStr = setUpVisAnnot_HW([0 0 0]);
 end
-annoStr.Stim.FontSize = ortho_font_size; 
+annoStr.Stim.FontSize = op.ortho_font_size; 
 
 CLOCKp = ManageTime('start');
 TIME_PREPARE = 0.5; % Waiting period before experiment begin (sec)
@@ -363,9 +344,7 @@ Input_files=regexp(fileread(Input_audname),'[\n\r]+','split');
 Input_files_temp=Input_files(cellfun('length',Input_files)>0);
 NoNull = find(~strcmp(Input_files_temp, 'NULL'));
 
-% load words table
-trials_words_file = [filepath, filesep, 'sub-',expParams.subject, '_ses-',num2str(expParams.session), '_run-',num2str(expParams.run), '_task-',expParams.task, '_trials-words.tsv'];
-trials_words = readtable(trials_words_file,'FileType','text');
+
 
 if ispc
     Input_files=arrayfun(@(x)fullfile(expParams.audiopath, expParams.task, strcat(strrep(x, '/', '\'), '.wav')), Input_files_temp);
@@ -374,38 +353,38 @@ else
 end
 
 
-if strcmp(expParams.visual, 'figure')
-    All_figures_str = dir(fullfile(expParams.figurespath, '*.png'));
-    All_figures = arrayfun(@(x)fullfile(All_figures_str(x).folder, All_figures_str(x).name), 1:length(All_figures_str), 'uni', 0);
-    figures=arrayfun(@(x)fullfile(expParams.figurespath, strcat(x, '.png')), Input_files_temp);
-    figureseq=arrayfun(@(x)find(strcmp(All_figures, x)), figures, 'uni', 0);
-    if sum(arrayfun(@(x)isempty(figureseq{x}), 1:length(figureseq))) ~= 0
-        disp('Some images not found or image names don''t match');
-        return
-    end
-end
+% % % % % % % % % % % % % % % if strcmp(expParams.visual, 'figure')
+% % % % % % % % % % % % % % %     All_figures_str = dir(fullfile(expParams.figurespath, '*.png'));
+% % % % % % % % % % % % % % %     All_figures = arrayfun(@(x)fullfile(All_figures_str(x).folder, All_figures_str(x).name), 1:length(All_figures_str), 'uni', 0);
+% % % % % % % % % % % % % % %     figures=arrayfun(@(x)fullfile(expParams.figurespath, strcat(x, '.png')), Input_files_temp);
+% % % % % % % % % % % % % % %     figureseq=arrayfun(@(x)find(strcmp(All_figures, x)), figures, 'uni', 0);
+% % % % % % % % % % % % % % %     if sum(arrayfun(@(x)isempty(figureseq{x}), 1:length(figureseq))) ~= 0
+% % % % % % % % % % % % % % %         disp('Some images not found or image names don''t match');
+% % % % % % % % % % % % % % %         return
+% % % % % % % % % % % % % % %     end
+% % % % % % % % % % % % % % % end
 
-ok=cellfun(@(x)exist(x,'file'), Input_files(NoNull));
-assert(all(ok), 'unable to find files %s', sprintf('%s ',Input_files{NoNull(~ok)}));
-dirFiles=cellfun(@dir, Input_files(NoNull), 'uni', 0);
-NoNull=NoNull(cellfun(@(x)x.bytes>0, dirFiles));
-Input_sound=cell(size(Input_files));
-Input_fs=num2cell(ones(size(Input_files)));
-[Input_sound(NoNull),Input_fs(NoNull)]=cellfun(@audioread, Input_files(NoNull),'uni',0);
-[silent_sound,silent_fs]=audioread(fullfile(expParams.audiopath, 'silent.wav'));
-stimreads=cell(size(Input_files));
-stimreads(NoNull)=cellfun(@(x)dsp.AudioFileReader(x, 'SamplesPerFrame', 2048),Input_files(NoNull),'uni',0);
-stimreads(setdiff(1:numel(stimreads), NoNull))=arrayfun(@(x)dsp.AudioFileReader(fullfile(expParams.audiopath, 'silent.wav'), 'SamplesPerFrame', 2048),1:numel(Input_files(setdiff(1:numel(stimreads), NoNull))),'uni',0);
-sileread = dsp.AudioFileReader(fullfile(expParams.audiopath, 'silent.wav'), 'SamplesPerFrame', 2048);
+% % % % % % % % % % % % % % % % % % ok=cellfun(@(x)exist(x,'file'), Input_files(NoNull));
+% % % % % % % % % % % % % % % % % % assert(all(ok), 'unable to find files %s', sprintf('%s ',Input_files{NoNull(~ok)}));
+% % % % % % % % % % % % % % % % % % dirFiles=cellfun(@dir, Input_files(NoNull), 'uni', 0);
+% % % % % % % % % % % % % % % % % % NoNull=NoNull(cellfun(@(x)x.bytes>0, dirFiles));
+% % % % % % % % % % % % % % % % % % Input_sound=cell(size(Input_files));
+% % % % % % % % % % % % % % % % % % Input_fs=num2cell(ones(size(Input_files)));
+% % % % % % % % % % % % % % % % % % [Input_sound(NoNull),Input_fs(NoNull)]=cellfun(@audioread, Input_files(NoNull),'uni',0);
+% % % % % % % % % % % % % % % % % % [silent_sound,silent_fs]=audioread(fullfile(expParams.audiopath, 'silent.wav'));
+% % % % % % % % % % % % % % % % % % stimreads=cell(size(Input_files));
+% % % % % % % % % % % % % % % % % % stimreads(NoNull)=cellfun(@(x)dsp.AudioFileReader(x, 'SamplesPerFrame', 2048),Input_files(NoNull),'uni',0);
+% % % % % % % % % % % % % % % % % % stimreads(setdiff(1:numel(stimreads), NoNull))=arrayfun(@(x)dsp.AudioFileReader(fullfile(expParams.audiopath, 'silent.wav'), 'SamplesPerFrame', 2048),1:numel(Input_files(setdiff(1:numel(stimreads), NoNull))),'uni',0);
+% % % % % % % % % % % % % % % % % % sileread = dsp.AudioFileReader(fullfile(expParams.audiopath, 'silent.wav'), 'SamplesPerFrame', 2048);
 
-if isempty(dir(Input_condname))
-    [nill,Input_conditions]=arrayfun(@fileparts,Input_files,'uni',0);
-else
-    Input_conditions=regexp(fileread(Input_condname),'[\n\r]+','split');
-    Input_conditions=Input_conditions(cellfun('length',Input_conditions)>0);
-    assert(numel(Input_files)==numel(Input_conditions),'unequal number of lines/trials in %s (%d) and %s (%d)',Input_audname, numel(Input_files), Input_condname, numel(Input_conditions));
-end
-expParams.numTrials = length(Input_conditions); % pull out the number of trials from the stimList
+% % % % % % % % % % % % % % % if isempty(dir(Input_condname))
+% % % % % % % % % % % % % % %     [nill,Input_conditions]=arrayfun(@fileparts,Input_files,'uni',0);
+% % % % % % % % % % % % % % % else
+% % % % % % % % % % % % % % %     Input_conditions=regexp(fileread(Input_condname),'[\n\r]+','split');
+% % % % % % % % % % % % % % %     Input_conditions=Input_conditions(cellfun('length',Input_conditions)>0);
+% % % % % % % % % % % % % % %     assert(numel(Input_files)==numel(Input_conditions),'unequal number of lines/trials in %s (%d) and %s (%d)',Input_audname, numel(Input_files), Input_condname, numel(Input_conditions));
+% % % % % % % % % % % % % % % end
+% % % % % % % % % % % % % % % expParams.numTrials = length(Input_conditions); % pull out the number of trials from the stimList
 
 Input_duration=cellfun(@(a,b)numel(a)/b, Input_sound, Input_fs);
 %meanInput_duration=mean(Input_duration(Input_duration>0));
@@ -512,29 +491,15 @@ for itrial = 1:expParams.numTrials
 
     set(annoStr.Plus, 'Visible','on');
     
-    % print current and upcoming stimulus questions 
-    % print trial number and total trials
-    if itrial ~= expParams.numTrials % if not last trial
-        next_trial_string = ['\n      Next trials question/word will be: ''', trials_words.question{itrial+1}, ''' /// ''', trials_words.word{itrial+1}, ''''];
-    elseif itrial == expParams.numTrials % if last trial
-        next_trial_string = '';
+    % print trial num and stim
+    fprintf([   '\n      ........ Trial ', num2str(itrial), '/' num2str(expParams.numTrials), ', Run...... ', num2str(expParams.run), trials.fullstim{itrial}]);
+
+    if (mod(itrial,op.ntrials_between_breaks) == 0) && (itrial ~= op.ntrials)  % Break after every X trials  , but not on the last
+        pause()
+        fprintf(['\n    Break time; press any key to continue \n'])
     end
-    fprintf([...
-        '\nThis trial''s stimulus question: ''', trials_words.question{itrial}, '''', ...
-        '\n      Answer = ''',trials_words.word{itrial}, '''',...
-        '\n      ........ Trial ', num2str(itrial), '/' num2str(expParams.numTrials), ', Run ', num2str(expParams.run), ...
-        next_trial_string,...
-        '\n      As you finish asking this trial''s question, please press Spacebar to start the ', num2str(anticipation_dur_sec), ' second anticipation period',...
-        '\n']);
 
-    % % % % % % % if (mod(itrial,ntrials_between_breaks) == 0) && (itrial ~= expParams.numTrials)  % Break after every X trials  , but not on the last
-    % % % % % % %     pause()
-    % % % % % % % 
-    % % % % % % % end
 
-    % pause at the beginning of every trial while experimenter asks question....
-    % .... after they press any key, proceed to anticipation period 
-    pause()
 
     pause(anticipation_dur_sec - experimenter_warning_latency_sec) % anticipation delay period
     fprintf(['\nGO cue will appear in ' num2str(experimenter_warning_latency_sec) ' seconds. Please look toward the subject now.\n'])
@@ -597,68 +562,6 @@ for itrial = 1:expParams.numTrials
 
 
 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_STIM_START);
-    % % % % % TIME_STIM_ACTUALLYSTART = ManageTime('current', CLOCK);
-    % % % % % 
-    % % % % % 
-    % % % % %     set(annoStr.Plus, 'Visible','off');
-    % % % % %     imshow(imgBuf{figureseq{itrial}}, 'Parent', annoStr.Pic);
-    % % % % % 
-    % % % % %     %%%%%%% AM added this condition 'drawnow' 2023/12/6 to fix the fact that fig wasn't appearing at stim onset..... may be caused by only using 1 monitor
-    % % % % %     if ~show_mic_trace_figure
-    % % % % %         drawnow; 
-    % % % % %     end
-    % % % % % 
-    % % % % % if ~ok, fprintf('i am late for this trial TIME_STIM_START\n'); end
-    % % % % % 
-    % % % % % TIME_SOUND_START = TIME_STIM_ACTUALLYSTART + trialData(itrial).timePreSound;
-    % % % % % %ok=ManageTime('wait', CLOCK, TIME_SOUND_START - stimoffset);
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_SOUND_START);
-    % % % % % %for reference: stimPlayer = audioplayer(Input_sound{ii},Input_fs{ii}, 24, stimID);
-    % % % % % %play(stimPlayer);
-    % % % % % %sttInd=1; endMax=size(Input_sound{ii}, 1); while sttInd<endMax; headwrite(Input_sound{ii}(sttInd:min(sttInd+2047, endMax))); sttInd=sttInd+2048; end; reset(headwrite);
-    % % % % % TIME_SOUND_ACTUALLYSTART = ManageTime('current', CLOCK);
-    % % % % % while ~isDone(stimread); sound=stimread();headwrite(sound);end;release(stimread);reset(headwrite);
-    % % % % % TIME_SOUND_END = TIME_SOUND_ACTUALLYSTART + trialData(itrial).timeStim;           % stimulus ends
-    % % % % % if ~ok, fprintf('i am late for this trial TIME_SOUND_START\n'); end
-    % % % % % 
-    % % % % % TIME_ALLSTIM_END = TIME_SOUND_END + trialData(itrial).timePostSound;
-    % % % % % %TIME_ALLSTIM_END = TIME_SOUND_RELEASED + trialData(ii).timePostSound;
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_ALLSTIM_END);
-    % % % % % if strcmp(expParams.visual, 'orthography')
-    % % % % %     set(annoStr.Stim, 'Visible','off');
-    % % % % %     set(annoStr.Plus, 'Visible','on');
-    % % % % %     drawnow;
-    % % % % % end
-    % % % % % if ~ok, fprintf('i am late for this trial TIME_ALLSTIM_END\n'); end        
-    % % % % % 
-    % % % % % TIME_GOSIGNAL_START = TIME_ALLSTIM_END + trialData(itrial).timePostStim;          % GO signal time
-    % % % % % if  show_mic_trace_figure
-    % % % % %     set(micLine,'visible','off');set(micLineB,'visible','off');
-    % % % % % end
-    % % % % % 
-    % % % % % drawnow;
-    % % % % % 
-    % % % % % 
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_GOSIGNAL_START - beepoffset);     % waits for recorder initialization time
-    % % % % % [nill, nill] = deviceReader(); % note: this line may take some random initialization time to run; audio signal start (t=0) will be synchronized to the time when this line finishes running
-    % % % % % if ~ok, fprintf('i am late for this trial TIME_GOSIGNAL_START - beepoffset\n'); end
-    % % % % % 
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_GOSIGNAL_START);     % waits for GO signal time
-    % % % % % %playblocking(beepPlayer)
-    % % % % % while ~isDone(beepread); sound=beepread();headwrite(sound);end;reset(beepread);reset(headwrite);
-    % % % % % %TIME_GOSIGNAL_RELEASED = ManageTime('current', CLOCK);
-    % % % % % %TIME_GOSIGNAL_ACTUALLYSTART = TIME_GOSIGNAL_RELEASED - beepdur; % actual time for GO signal 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % 
     TIME_GOSIGNAL_ACTUALLYSTART = ManageTime('current', CLOCK); % actual time for GO signal 
 
 
@@ -668,122 +571,159 @@ for itrial = 1:expParams.numTrials
 
 
 
+set(annoStr.Stim,'String',trials.fullstim{itrial}); % prepare this trial's word stim
 
 
-% show the green GO screen
-        set(annoStr.Plus, 'Visible','off');
-        imshow(imgBuf{figureseq{itrial}}, 'Parent', annoStr.Pic);
+% show the get-ready stim
+switch op.stim_prdm
+    case 'word_go'
+        set(annoStr.Stim,'Visible','on'); 
+    case 'cue_word'
+        set(annoStr.Plus,'Visible','on'); 
+end
+pause(op.get_ready_stim_dur)
+
+% remove the get-ready stim
+switch op.stim_prdm
+    case 'word_go'
+        set(annoStr.Stim,'Visible','off'); 
+    case 'cue_word'
+        set(annoStr.Plus,'Visible','off'); 
+end
+
+% pause before GO cue
+pause(op.prespeech_delay_dur); 
+
+% present the GO cue
+switch op.stim_prdm
+    case 'word_go'
+        set(annoStr.Stim,'Visible','on'); 
+    case 'cue_word'
+        set(annoStr.Exclam,'Visible','on'); 
+end
+pause(op.go_stim_dur)
+
+% remove GO cue
+switch op.stim_prdm
+    case 'word_go'
+        set(annoStr.Stim,'Visible','off'); 
+    case 'cue_word'
+        set(annoStr.Exclam,'Visible','off'); 
+end
+
+
 
     % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % if strcmp(expParams.visual, 'fixpoint'),set(annoStr.Plus, 'color','g');drawnow;end
     % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % if strcmp(expParams.visual, 'orthography'),set(annoStr.Plus, 'color','g');drawnow;end
     % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % if ~ok, fprintf('i am late for this trial TIME_GOSIGNAL_START\n'); end
-    TIME_VOICE_START = TIME_GOSIGNAL_ACTUALLYSTART + nonSpeechDelay;                   % expected voice onset time
-
-
-    endSamples = SpeechTrial * nSamples + (1-SpeechTrial)*nSamplesNULL;
-    while endIdx < endSamples
-        % find beginning/end indices of frame
-        begIdx = (frameCount*expParams.frameLength)-(expParams.frameLength-1) + nMissingSamples;
-        endIdx = (frameCount*expParams.frameLength) + nMissingSamples;
-
-        % read audio data
-        [audioFromDevice, numOverrun] = deviceReader();     % read one frame of audio data % note: audio t=0 corresponds to first call to deviceReader, NOT to time of setup(...)
-        numOverrun = double(numOverrun);    % convert from uint32 to type double
-        if numOverrun > 0, recAudio(begIdx:begIdx+numOverrun-1) = 0; end      % set missing samples to 0
-        recAudio(begIdx+numOverrun:endIdx+numOverrun) = audioFromDevice;    % save frame to audio vector
-        nMissingSamples = nMissingSamples + numOverrun;     % keep count of cumulative missng samples between frames
-
-        % plot audio data
-        if show_mic_trace_figure
-            set(micSignal, 'xdata',time, 'ydata',recAudio(1:numel(time)))
-        end
-        drawnow()
-
-        % voice onset exclusion
-        minVoiceOnsetTime = max(0, expParams.minVoiceOnsetTime-(begIdx+numOverrun)/expParams.sr);
-        
-        % detect beep onset
-        if SpeechTrial && beepDetected == 0 && expParams.minVoiceOnsetTime > (begIdx+numOverrun)/expParams.sr
-            % look for beep onset
-            [beepDetected, bTime, beepOnsetState]  = detectVoiceOnset(recAudio(begIdx+numOverrun:endIdx+numOverrun), expParams.sr, expParams.rmsThreshTimeOnset, rmsBeepThresh, 0, beepOnsetState);
-            if beepDetected
-                beepTime = bTime + (begIdx+numOverrun)/expParams.sr; 
-                 if show_mic_trace_figure
-                    set(micLineB,'value',beepTime,'visible','on');
-                 end
-            end
-        elseif SpeechTrial && voiceOnsetDetected == 0,% && frameCount > onsetWindow/frameDur
-            if ~beepDetected; beepTime = 0; 
-                % disp('Beep not detected. Assign beepTime = 0.'); 
-            end
-            trialData(itrial).beepTime = beepTime;
-
-            % look for voice onset in previous onsetWindow
-            [voiceOnsetDetected, voiceOnsetTime, voiceOnsetState]  = detectVoiceOnset(recAudio(begIdx+numOverrun:endIdx+numOverrun), expParams.sr, expParams.rmsThreshTimeOnset, rmsThresh, minVoiceOnsetTime, voiceOnsetState);
-            % update voice onset time based on index of data passed to voice onset function
-
-            if voiceOnsetDetected
-                voiceOnsetTime = voiceOnsetTime + (begIdx+numOverrun)/expParams.sr - beepTime;
-                TIME_VOICE_START = TIME_GOSIGNAL_ACTUALLYSTART + voiceOnsetTime; % note: voiceonsetTime marks the beginning of the minThreshTime window
-                nonSpeechDelay = .5*nonSpeechDelay + .5*voiceOnsetTime;  % running-average of voiceOnsetTime values, with alpha-parameter = 0.5 (nonSpeechDelay = alpha*nonSpeechDelay + (1-alph)*voiceOnsetTime; alpha between 0 and 1; alpha high -> slow update; alpha low -> fast update)
-                TIME_SCAN_START =  TIME_VOICE_START + trialData(itrial).timePostOnset;
-                nSamples = min(nSamples, ceil((TIME_SCAN_START-TIME_GOSIGNAL_ACTUALLYSTART)*expParams.sr));
-                endSamples = nSamples;
-                % add voice onset to plot
-                if show_mic_trace_figure
-                    set(micLine,'value',voiceOnsetTime + beepTime,'visible','on');
-                    
-                   
-                end
-                drawnow update
-            end
-
-        end
-
-        frameCount = frameCount+1;
-
-    end
-    if SpeechTrial && voiceOnsetDetected == 0 
-        % fprintf('warning: voice was expected but not detected (rmsThresh = %f)\n',rmsThresh); 
-    end
-    release(deviceReader); % end recording
-    
-    switch expParams.visual
-        % % % % % % % % % % % case 'fixpoint'
-        % % % % % % % % % % %     set(annoStr.Plus, 'color','w');
-        case 'figure'
-            imshow([], 'Parent', annoStr.Pic);
-        % % % % % % % % case 'orthography'
-        % % % % % % % %     set(annoStr.Plus, 'color','w');
-    end
-
-
-    
-    
-   
-    %stop(t);
-    %delete(t);
-
-    %% save voice onset time and determine how much time left before sending trigger to scanner
-    if voiceOnsetDetected == 0 %if voice onset wasn't detected
-        trialData(itrial).onsetDetected = 0;
-        trialData(itrial).voiceOnsetTime = NaN;
-        trialData(itrial).nonSpeechDelay = nonSpeechDelay;
-    else
-        trialData(itrial).onsetDetected = 1;
-        trialData(itrial).voiceOnsetTime = voiceOnsetTime;
-        trialData(itrial).nonSpeechDelay = NaN;
-    end
-
-
-        TIME_SCAN_ACTUALLYSTART=nan;
-        %TIME_TRIG_RELEASED = nan;
-        TIME_SCAN_END = nan;
-        % NEXTTRIAL = TIME_SCAN_START + trialData(itrial).timePreStim;
-
-        
-    trialData(itrial).timingTrial = [TIME_GOSIGNAL_ACTUALLYSTART;TIME_VOICE_START];
-    expParams.timingTrialNames = split('TIME_GOSIGNAL_ACTUALLYSTART;TIME_VOICE_START', ';');
+ 
+    % TIME_VOICE_START = TIME_GOSIGNAL_ACTUALLYSTART + nonSpeechDelay;                   % expected voice onset time
+    % 
+    % 
+    % endSamples = SpeechTrial * nSamples + (1-SpeechTrial)*nSamplesNULL;
+    % while endIdx < endSamples
+    %     % find beginning/end indices of frame
+    %     begIdx = (frameCount*expParams.frameLength)-(expParams.frameLength-1) + nMissingSamples;
+    %     endIdx = (frameCount*expParams.frameLength) + nMissingSamples;
+    % 
+    %     % read audio data
+    %     [audioFromDevice, numOverrun] = deviceReader();     % read one frame of audio data % note: audio t=0 corresponds to first call to deviceReader, NOT to time of setup(...)
+    %     numOverrun = double(numOverrun);    % convert from uint32 to type double
+    %     if numOverrun > 0, recAudio(begIdx:begIdx+numOverrun-1) = 0; end      % set missing samples to 0
+    %     recAudio(begIdx+numOverrun:endIdx+numOverrun) = audioFromDevice;    % save frame to audio vector
+    %     nMissingSamples = nMissingSamples + numOverrun;     % keep count of cumulative missng samples between frames
+    % 
+    %     % plot audio data
+    %     if show_mic_trace_figure
+    %         set(micSignal, 'xdata',time, 'ydata',recAudio(1:numel(time)))
+    %     end
+    %     drawnow()
+    % 
+    %     % voice onset exclusion
+    %     minVoiceOnsetTime = max(0, expParams.minVoiceOnsetTime-(begIdx+numOverrun)/expParams.sr);
+    % 
+    %     % detect beep onset
+    %     if SpeechTrial && beepDetected == 0 && expParams.minVoiceOnsetTime > (begIdx+numOverrun)/expParams.sr
+    %         % look for beep onset
+    %         [beepDetected, bTime, beepOnsetState]  = detectVoiceOnset(recAudio(begIdx+numOverrun:endIdx+numOverrun), expParams.sr, expParams.rmsThreshTimeOnset, rmsBeepThresh, 0, beepOnsetState);
+    %         if beepDetected
+    %             beepTime = bTime + (begIdx+numOverrun)/expParams.sr; 
+    %              if show_mic_trace_figure
+    %                 set(micLineB,'value',beepTime,'visible','on');
+    %              end
+    %         end
+    %     elseif SpeechTrial && voiceOnsetDetected == 0,% && frameCount > onsetWindow/frameDur
+    %         if ~beepDetected; beepTime = 0; 
+    %             % disp('Beep not detected. Assign beepTime = 0.'); 
+    %         end
+    %         trialData(itrial).beepTime = beepTime;
+    % 
+    %         % look for voice onset in previous onsetWindow
+    %         [voiceOnsetDetected, voiceOnsetTime, voiceOnsetState]  = detectVoiceOnset(recAudio(begIdx+numOverrun:endIdx+numOverrun), expParams.sr, expParams.rmsThreshTimeOnset, rmsThresh, minVoiceOnsetTime, voiceOnsetState);
+    %         % update voice onset time based on index of data passed to voice onset function
+    % 
+    %         if voiceOnsetDetected
+    %             voiceOnsetTime = voiceOnsetTime + (begIdx+numOverrun)/expParams.sr - beepTime;
+    %             TIME_VOICE_START = TIME_GOSIGNAL_ACTUALLYSTART + voiceOnsetTime; % note: voiceonsetTime marks the beginning of the minThreshTime window
+    %             nonSpeechDelay = .5*nonSpeechDelay + .5*voiceOnsetTime;  % running-average of voiceOnsetTime values, with alpha-parameter = 0.5 (nonSpeechDelay = alpha*nonSpeechDelay + (1-alph)*voiceOnsetTime; alpha between 0 and 1; alpha high -> slow update; alpha low -> fast update)
+    %             TIME_SCAN_START =  TIME_VOICE_START + trialData(itrial).timePostOnset;
+    %             nSamples = min(nSamples, ceil((TIME_SCAN_START-TIME_GOSIGNAL_ACTUALLYSTART)*expParams.sr));
+    %             endSamples = nSamples;
+    %             % add voice onset to plot
+    %             if show_mic_trace_figure
+    %                 set(micLine,'value',voiceOnsetTime + beepTime,'visible','on');
+    % 
+    % 
+    %             end
+    %             drawnow update
+    %         end
+    % 
+    %     end
+    % 
+    %     frameCount = frameCount+1;
+    % 
+    % end
+    % if SpeechTrial && voiceOnsetDetected == 0 
+    %     % fprintf('warning: voice was expected but not detected (rmsThresh = %f)\n',rmsThresh); 
+    % end
+    % release(deviceReader); % end recording
+    % 
+    % switch expParams.visual
+    %     % % % % % % % % % % % case 'fixpoint'
+    %     % % % % % % % % % % %     set(annoStr.Plus, 'color','w');
+    %     case 'figure'
+    %         imshow([], 'Parent', annoStr.Pic);
+    %     % % % % % % % % case 'orthography'
+    %     % % % % % % % %     set(annoStr.Plus, 'color','w');
+    % end
+    % 
+    % 
+    % 
+    % 
+    % 
+    % %stop(t);
+    % %delete(t);
+    % 
+    % %% save voice onset time and determine how much time left before sending trigger to scanner
+    % if voiceOnsetDetected == 0 %if voice onset wasn't detected
+    %     trialData(itrial).onsetDetected = 0;
+    %     trialData(itrial).voiceOnsetTime = NaN;
+    %     trialData(itrial).nonSpeechDelay = nonSpeechDelay;
+    % else
+    %     trialData(itrial).onsetDetected = 1;
+    %     trialData(itrial).voiceOnsetTime = voiceOnsetTime;
+    %     trialData(itrial).nonSpeechDelay = NaN;
+    % end
+    % 
+    % 
+    %     TIME_SCAN_ACTUALLYSTART=nan;
+    %     %TIME_TRIG_RELEASED = nan;
+    %     TIME_SCAN_END = nan;
+    %     % NEXTTRIAL = TIME_SCAN_START + trialData(itrial).timePreStim;
+    % 
+    % 
+    % trialData(itrial).timingTrial = [TIME_GOSIGNAL_ACTUALLYSTART;TIME_VOICE_START];
+    % expParams.timingTrialNames = split('TIME_GOSIGNAL_ACTUALLYSTART;TIME_VOICE_START', ';');
 
 
     % DON'T adapt rmsThresh
@@ -816,8 +756,7 @@ for itrial = 1:expParams.numTrials
     % save only data from current trial
     tData = trialData(itrial);
 
-    % fName_trial will be used for individual trial files (which will
-    % live in the run folder)
+    % fName_trial will be used for individual trial files (which will live in the run folder)
     fName_trial = fullfile(filepath,sprintf('sub-%s_ses-%d_run-%d_task-%s_trial-%d.mat',expParams.subject, expParams.session, expParams.run, expParams.task,itrial));
     save(fName_trial,'tData');
 end
