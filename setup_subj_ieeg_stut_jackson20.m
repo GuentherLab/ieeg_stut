@@ -12,7 +12,9 @@ function setup_subj_ieeg_stut_jackson20(subjID)
 
 repetitions_per_word = 5; 
 
-projpath = 'C:\ieeg_stut_data';
+%% should change paths so that they are all determined by set_paths_ieeg_stut
+
+projpath = 'C:\ieeg-stut';
 
 % stim_master_file = 'stim_master_dbsmulti.xlsx'; 
 % stim_master = readtable(stim_master_file); 

@@ -21,11 +21,16 @@ nmaster = height(word_master_list);
 master_remain = word_master_list; % words that haven't been used yet
 
 ntrials = op.ntrials;
+nan1 = nan(ntrials,1); 
 cel1 = cell(ntrials,1); 
 cel2 = cell(ntrials,2);
 trials = table(cel2,'VariableNames',{'word'});
 trials.first_letter = cel2; 
 trials.fullstim = cell1; 
+trials.t_rdy_on = nan1; % times of get-ready stim onset
+trials.t_rdy_off = nan1; % times of get-ready stim offset
+trials.t_go_on = nan1; % times of GO cue onset
+trials.t_go_off = nan1; % times of GO cue onset
 
 
 for itrial = 1:ntrials

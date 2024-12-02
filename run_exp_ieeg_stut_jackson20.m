@@ -818,7 +818,7 @@ for itrial = 1:expParams.numTrials
 
     % fName_trial will be used for individual trial files (which will
     % live in the run folder)
-    fName_trial = fullfile(filepath,sprintf('sub-%s_ses-%d_run-%d_task-%s_trial-%d.mat',expParams.subject, expParams.session, expParams.run, expParams.task,itrial));
+    fName_trial = fullfile(filepath,sprintf('sub-%s_ses-%d_task-%s_run-%d_trial-%d.mat',expParams.subject, expParams.session, expParams.task,expParams.run, itrial));
     save(fName_trial,'tData');
 end
 
