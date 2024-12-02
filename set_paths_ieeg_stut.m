@@ -43,7 +43,7 @@ if strncmpi('scc-x02', host, 3) % Using SCC
     dirs.spm = '/project/busplab/software/spm12'; 
     dirs.FLvoice = '/project/busplab/software/FLvoice'; 
 
-else
+else % analyzing on a local machine
     switch host
             
         case {'MSI','677-GUE-WL-0010'} % Andrew Meier laptop
@@ -52,16 +52,15 @@ else
             dirs.spm = [pkgdir filesep 'spm12'];
             dirs.conn = [pkgdir filesep 'conn'];
             dirs.FLvoice  = [pkgdir filesep 'FLvoice'];
-            
+
+            dirs.data = ['C:\ieeg_stut'];  
         otherwise
             
             disp('Directory listings are not set up for this computer. Please check that your hostname is correct.');
             
             return
     end
-
-   % subject data.... use gitignore to not upload these large data files to github
-    dirs.data = [dirs.projrepo filesep 'data'];  
+    
 
 end
 

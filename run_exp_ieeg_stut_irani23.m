@@ -65,8 +65,11 @@ system(sprintf('wmic process where processid=%d call setpriority "high priority"
 %% params 
 
 [dirs, host] = set_paths_ieeg_stut(); 
+vardefault('op',struct);
+field_default('op','sub','qqq');
+field_default('op','ses',1); 
 
-show_mic_trace_figure = 0; % if false, make mic trace figure invisible
+op.show_mic_trace_figure = 0; % if false, make mic trace figure invisible
         
 op.get_ready_stim_dur = 1; % duration in sec of the visual stimulus occurring before speech onset
 
@@ -77,8 +80,8 @@ op.go_stim_dur = 4.5; % duration in sec of visual cue instructing speech onset
 op.task = 'irani23'; 
 
 %%%%%%%%%%%% stimulus paradigm - see irani ea 2023, fig 1
-op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
-% op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
+% op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
+op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
 
 
 op.ntrials = 100; 
@@ -87,14 +90,16 @@ op.word_list_master_filename = [dirs.stim, filesep, 'irani23_word_list_master.ts
 
 
 op.ortho_font_size = 70; 
+op.background_color = [0 0 0]; % text will be inverse of this color
 
 op.ntrials_between_breaks = 34; %%%% not currently implemented
+
 
 
 pause('on') % enable to use of pause.m to hold code execution until keypress
 
 %% generate trial stim list
-[trials] = setup_subj_ieeg_stut_irani23(op)
+[trials] = setup_subj_ieeg_stut_irani23(op);
 
 %% audio device setup
 [~,computername] = system('hostname'); % might not work on non-windows machines
@@ -323,13 +328,9 @@ expRead = {};
 %     end
 % end
 % 
-% % visual setup
-% if strcmp(expParams.visual, 'figure')
-%     annoStr = setUpVisAnnot_HW([1 1 1]);
-% else
-%     annoStr = setUpVisAnnot_HW([0 0 0]);
-% end
-% annoStr.Stim.FontSize = op.ortho_font_size; 
+% visual setup
+annoStr = setUpVisAnnot_HW(op.background_color); 
+annoStr.Stim.FontSize = op.ortho_font_size; 
 % 
 % CLOCKp = ManageTime('start');
 % TIME_PREPARE = 0.5; % Waiting period before experiment begin (sec)
@@ -339,7 +340,7 @@ expRead = {};
 % 
 % 
 % % locate files
-dirs.ses = fullfile(dirs.data, sprintf('sub-%s',op.subject), sprintf('ses-%d',op.session),'beh', op.task);
+dirs.ses = fullfile(dirs.data, sprintf('sub-%s',op.sub), sprintf('ses-%d',op.ses),'beh', op.task);
 % Input_audname  = fullfile(dirs.ses,sprintf('sub-%s_ses-%d_run-%d_task-%s_desc-stimulus.txt',expParams.subject, expParams.session, expParams.run, expParams.task));
 % Input_condname  = fullfile(dirs.ses,sprintf('sub-%s_ses-%d_run-%d_task-%s_desc-conditions.txt',expParams.subject, expParams.session, expParams.run, expParams.task));
 % Output_name = fullfile(dirs.ses,sprintf('sub-%s_ses-%d_run-%d_task-%s_desc-audio.mat',expParams.subject, expParams.session, expParams.run, expParams.task));
@@ -369,11 +370,11 @@ if nnz(rundirnums) == 0 % if there's not already a rundir here
 elseif nnz(rundirnums) > 0 % if there's already a rundir here
     op.run = max(rundirnums) + 1; % this run = latest run plus 1
 end
-paths.run = [dirs.ses, filesep, 'run-', num2str(op.run,'%02.f')]; 
-mkdir(paths.run) ; clear dd rundirnames rundirnums
+dirs.run = [dirs.ses, filesep, 'run-', num2str(op.run,'%02.f')]; 
+mkdir(dirs.run) ; clear dd rundirnames rundirnums
 
 % save stim list
-fname_trialtable = [dirs.ses, filesep, 'sub-',op.sub, '_ses-',op.ses, '_task-',op.task, '_run-',op.run, '_trials']; 
+fname_trialtable = [dirs.ses, filesep, 'sub-',op.sub, '_ses-',num2str(op.ses), '_task-',op.task, '_run-',num2str(op.run), '_trials']; 
 save(fname_trialtable,'trials','op','dirs')
 
 
@@ -481,8 +482,8 @@ save(fname_trialtable,'trials','op','dirs')
 % nonSpeechDelay = .5; % initial estimate of time between go signal and voicing start
 % 
 % %%%%% set up figure for real-time plotting of audio signal of next trial
-% if show_mic_trace_figure
-%     rtfig = figure('units','norm','position',[.1 .2 .4 .5],'menubar','none', 'Visible',show_mic_trace_figure);
+% if op.show_mic_trace_figure
+%     rtfig = figure('units','norm','position',[.1 .2 .4 .5],'menubar','none', 'Visible',op.show_mic_trace_figure);
 %     micSignal = plot(nan,nan,'-', 'Color', [0 0 0.5]);
 %     micLine = xline(0, 'Color', [0.984 0.352 0.313], 'LineWidth', 3);
 %     micLineB = xline(0, 'Color', [0.46 1 0.48], 'LineWidth', 3);
@@ -510,22 +511,41 @@ save(fname_trialtable,'trials','op','dirs')
 % while ~isDone(sileread); sound=sileread();headwrite(sound);end;release(sileread);reset(headwrite);
 % ok=ManageTime('wait', CLOCKp, TIME_PREPARE_END+2);
 % set(annoStr.Stim, 'Visible','off');     % Turn off preparation page
-% CLOCK=[];                               % Main clock (not yet started)
+CLOCK=[];                               % Main clock (not yet started)
 % expParams.timeNULL = expParams.timeMax(1) + diff(expParams.timeMax).*rand;
 % intvs = [];
+
+% starting message for each block
+switch op.stim_prdm
+    case 'cue_word'
+        instruct_msg = {'On each trial, first look at the cross in the center of the screen.','',...
+            'Two made-up words will appear.','',...
+            'Say these two words as quickly and accurately as possible.'};
+    case 'word_go'
+        instruct_msg = {'On each trial, you will see two made-up words appear.','',...
+            'Wait until you see the ''!!!'' appear, then say these two words as quickly and accurately as possible'};
+
+end
+
+% set(annoStr.Instruction,'String',[instruct_msg, '\n\n When you''re ready, press any key to start']); %  use this option if subject has keyboard available; otherwise, experimenter does keypress
+set(annoStr.Instruction,'String',[instruct_msg])
+set(annoStr.Instruction,'FontSize', op.ortho_font_size / 2); 
+
+set(annoStr.Instruction,'Visible','on'); 
+pause()  % wait for keypress to start the run
+set(annoStr.Instruction,'Visible','off'); 
+pause(1)
 
 %% LOOP OVER TRIALS
 
 
 
-for itrial = 1:expParams.numTrials
+for itrial = 1:op.ntrials
 
-%% NEED TO SAVE TIMING DATA AFTER EVERY TRIAL
-
-    set(annoStr.Plus, 'Visible','on');
+    % set(annoStr.Plus, 'Visible','on');
     
     % print trial num and stim
-    fprintf([   '\n      ........ Trial ', num2str(itrial), '/' num2str(expParams.numTrials), ', Run...... ', num2str(expParams.run), trials.fullstim{itrial}]);
+    fprintf([   '\n      .... Trial ', num2str(itrial), '/' num2str(op.ntrials), ', Run ', num2str(op.run), '.....', trials.fullstim{itrial}]);
 
     if (mod(itrial,op.ntrials_between_breaks) == 0) && (itrial ~= op.ntrials)  % Break after every X trials  , but not on the last
         pause()
@@ -566,7 +586,7 @@ for itrial = 1:expParams.numTrials
 %     beepOnsetState = [];
 % 
     % % set up figure for real-time plotting of audio signal of next trial
-    % if show_mic_trace_figure
+    % if op.show_mic_trace_figure
     %     figure(rtfig)
     %     set(micTitle,'string',sprintf('%s %s run %d trial %d condition: %s', expParams.subject, expParams.task, expParams.run, itrial, trialData(itrial).condLabel));
     % end
@@ -575,7 +595,7 @@ for itrial = 1:expParams.numTrials
     % %t = timer;
     % %t.StartDelay = 0.050;   % Delay between timer start and timer function
     % %t.TimerFcn = @(myTimerObj, thisEvent)play(beepPlayer); % Timer function plays GO signal
-    setup(deviceReader) % note: moved this here to avoid delays in time-sensitive portion
+    % setup(deviceReader) % note: moved this here to avoid delays in time-sensitive portion
 
     if isempty(CLOCK)
         CLOCK = ManageTime('start');                        % resets clock to t=0 (first-trial start-time)
@@ -614,9 +634,9 @@ for itrial = 1:expParams.numTrials
     % present the GO cue
     switch op.stim_prdm
         case 'word_go'
-            set(annoStr.Stim,'Visible','on'); 
-        case 'cue_word'
             set(annoStr.Exclam,'Visible','on'); 
+        case 'cue_word'
+            set(annoStr.Stim,'Visible','on'); 
     end
     TIME_GOSIGNAL_ACTUALLYSTART = ManageTime('current', CLOCK); % actual time for GO signal 
     trials.t_go_on(itrial) = TIME_GOSIGNAL_ACTUALLYSTART; 
@@ -626,9 +646,9 @@ for itrial = 1:expParams.numTrials
     % remove GO cue
     switch op.stim_prdm
         case 'word_go'
-            set(annoStr.Stim,'Visible','off'); 
-        case 'cue_word'
             set(annoStr.Exclam,'Visible','off'); 
+        case 'cue_word'
+            set(annoStr.Stim,'Visible','off'); 
     end
     trials.t_go_off(itrial) =  ManageTime('current', CLOCK);
 
@@ -654,7 +674,7 @@ for itrial = 1:expParams.numTrials
     %     nMissingSamples = nMissingSamples + numOverrun;     % keep count of cumulative missng samples between frames
     % 
     %     % plot audio data
-    %     if show_mic_trace_figure
+    %     if op.show_mic_trace_figure
     %         set(micSignal, 'xdata',time, 'ydata',recAudio(1:numel(time)))
     %     end
     %     drawnow()
@@ -668,7 +688,7 @@ for itrial = 1:expParams.numTrials
     %         [beepDetected, bTime, beepOnsetState]  = detectVoiceOnset(recAudio(begIdx+numOverrun:endIdx+numOverrun), expParams.sr, expParams.rmsThreshTimeOnset, rmsBeepThresh, 0, beepOnsetState);
     %         if beepDetected
     %             beepTime = bTime + (begIdx+numOverrun)/expParams.sr; 
-    %              if show_mic_trace_figure
+    %              if op.show_mic_trace_figure
     %                 set(micLineB,'value',beepTime,'visible','on');
     %              end
     %         end
@@ -690,7 +710,7 @@ for itrial = 1:expParams.numTrials
     %             nSamples = min(nSamples, ceil((TIME_SCAN_START-TIME_GOSIGNAL_ACTUALLYSTART)*expParams.sr));
     %             endSamples = nSamples;
     %             % add voice onset to plot
-    %             if show_mic_trace_figure
+    %             if op.show_mic_trace_figure
     %                 set(micLine,'value',voiceOnsetTime + beepTime,'visible','on');
     % 
     % 
@@ -777,14 +797,14 @@ for itrial = 1:expParams.numTrials
     % tData = trialData(itrial);
 
     % fName_trial will be used for individual trial files (which will live in the run folder)
-    fName_trial = fullfile(dirs.ses,sprintf('sub-%s_ses-%d_run-%d_task-%s_trial-%d.mat',op.sub, op.session, op.run, op.task, itrial));
+    fName_trial = fullfile(dirs.run,sprintf('sub-%s_ses-%d_run-%d_task-%s_trial-%d.mat',op.sub, op.ses, op.run, op.task, itrial));
     % save(fName_trial,'tData');
     trialdat = trials(itrial,:); 
     save(fName_trial,'trialdat','op'); % save timing data for this trial
 end
 
-release(headwrite);
-release(beepread);
+% release(headwrite);
+% release(beepread);
 
 
 %% end of experiment

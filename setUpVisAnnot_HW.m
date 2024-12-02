@@ -27,8 +27,8 @@ end
 winPos = figPosition;
 
 %% Preparing 'Ready' Annotation Position
-rdAnoD = [700 300];
-rdAnoPos = getPos(rdAnoD, winPos);
+instructAnoD = [900 300];
+instructAnoPos = getPos(instructAnoD, winPos);
 
 % Preparing 'Cue' Annotation Position
 cuAnoD = [250 150];
@@ -62,7 +62,7 @@ cSettings = {'Color',txt,...
     'visible','off'};
 
 % Ready annotation
-annoStr.Ready = annotation(VBFig,'textbox', rdAnoPos,...
+annoStr.Instruction = annotation(VBFig,'textbox', instructAnoPos,...
     'String',{'READY'},...
     cSettings{:});
 
