@@ -329,7 +329,7 @@ expRead = {};
 % end
 % 
 % visual setup
-annoStr = setUpVisAnnot_HW(op.background_color); 
+annoStr = setUpVisAnnot_HW(op); 
 annoStr.Stim.FontSize = op.ortho_font_size; 
 % 
 % CLOCKp = ManageTime('start');

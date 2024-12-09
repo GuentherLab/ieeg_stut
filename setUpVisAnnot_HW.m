@@ -1,4 +1,4 @@
-function annoStr = setUpVisAnnot_HW(bg)
+function annoStr = setUpVisAnnot_HW(op)
 % Setting up visualization
 % Helper script that sets up a couple of annotation objects that can be used for
 % stimulus visualization / presentation.
@@ -6,8 +6,8 @@ function annoStr = setUpVisAnnot_HW(bg)
 
 HW_testing = false;
 
-if nargin<1||isempty(bg), bg = [0 0 0]; end
-txt = 1 - bg;
+if nargin<1||isempty(op.background_color), op.background_color = [0 0 0]; end
+txt = 1 - op.background_color;
 
 %% get monitorSize and set up related var
 monitorSize = get(0, 'Monitor');
@@ -27,7 +27,9 @@ end
 winPos = figPosition;
 
 %% Preparing 'Ready' Annotation Position
-instructAnoD = [900 300];
+% instructAnoD = [900 300];
+instructAnoD = [600 300];
+
 instructAnoPos = getPos(instructAnoD, winPos);
 
 % Preparing 'Cue' Annotation Position
@@ -42,7 +44,7 @@ stimAnoPos = [0 0 1 1]; % full screen
 
 %% Actually create the stim presentation figure
 % this causes the stim window to appear
-VBFig = figure('NumberTitle', 'off', 'Color', bg, 'Position', winPos, 'MenuBar', 'none');
+VBFig = figure('NumberTitle', 'off', 'Color', op.background_color, 'Position', winPos, 'MenuBar', 'none');
 drawnow; 
 if ~HW_testing
     if ~isequal(get(VBFig,'position'),winPos), set(VBFig,'Position',winPos); end % fix needed only on some dual monitor setups
@@ -58,7 +60,7 @@ cSettings = {'Color',txt,...
     'FontName','Arial',...
     'FitBoxToText','off',...
     'EdgeColor','none',...
-    'BackgroundColor',bg,...
+    'BackgroundColor',op.background_color,...
     'visible','off'};
 
 % Ready annotation
