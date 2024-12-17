@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="intraop_proposed_trial_schematic_20241216.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.4520903"
+     inkscape:cx="266.16801"
+     inkscape:cy="397.70253"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="-8"
+     inkscape:window-y="1052"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showgrid="true">
+    <inkscape:grid
+       id="grid1"
+       units="mm"
+       originx="0"
+       originy="0"
+       spacingx="0.99999998"
+       spacingy="1"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1"
+       width="22.593864"
+       height="17.492023"
+       x="9.9932108"
+       y="62.497547" />
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1-8"
+       width="22.593864"
+       height="17.492023"
+       x="34.210426"
+       y="62.533878" />
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1-5"
+       width="22.593864"
+       height="17.492023"
+       x="55.198051"
+       y="83.079163" />
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1-8-5"
+       width="22.593864"
+       height="17.492023"
+       x="79.415352"
+       y="83.115494" />
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1-5-3"
+       width="22.593864"
+       height="17.492023"
+       x="100.2293"
+       y="103.67426" />
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1-8-5-2"
+       width="22.593864"
+       height="17.492023"
+       x="124.4466"
+       y="103.71059" />
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1-5-6"
+       width="22.593864"
+       height="17.492023"
+       x="145.39519"
+       y="124.36098" />
+    <rect
+       style="fill:#000000;stroke-width:0.264583"
+       id="rect1-8-5-1"
+       width="22.593864"
+       height="17.492023"
+       x="169.61249"
+       y="124.39731" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="epoch titles">
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;stroke-width:0.265;stroke:#000000;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
+       x="69.239265"
+       y="81.030441"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="stroke-width:0.265;stroke:#000000;stroke-opacity:1;stroke-dasharray:none;fill:#ff0000;fill-opacity:1"
+         x="69.239265"
+         y="81.030441">Anticipation</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;stroke-width:0.265;stroke:#000000;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
+       x="26.179941"
+       y="60.3881"
+       id="text1-7"><tspan
+         sodipodi:role="line"
+         id="tspan1-9"
+         style="stroke-width:0.265;stroke:#000000;stroke-opacity:1;stroke-dasharray:none;fill:#ff0000;fill-opacity:1"
+         x="26.179941"
+         y="60.3881">Question</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;stroke-width:0.265;stroke:#000000;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
+       x="115.0109"
+       y="101.77454"
+       id="text1-1"><tspan
+         sodipodi:role="line"
+         id="tspan1-2"
+         style="stroke-width:0.265;stroke:#000000;stroke-opacity:1;stroke-dasharray:none;fill:#ff0000;fill-opacity:1"
+         x="115.0109"
+         y="101.77454">Response</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:3.175px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff0000;fill-opacity:1;stroke:#000000;stroke-width:0.265;stroke-dasharray:none;stroke-opacity:1"
+       x="162.37303"
+       y="122.65645"
+       id="text1-11"><tspan
+         sodipodi:role="line"
+         id="tspan1-3"
+         style="fill:#ff0000;fill-opacity:1;stroke:#ff0000;stroke-width:0.265;stroke-dasharray:none;stroke-opacity:1"
+         x="162.37303"
+         y="122.65645">Intertrial</tspan></text>
+  </g>
+</svg>
