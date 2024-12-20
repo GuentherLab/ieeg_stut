@@ -66,8 +66,11 @@ system(sprintf('wmic process where processid=%d call setpriority "high priority"
 
 [dirs, host] = set_paths_ieeg_stut(); 
 vardefault('op',struct);
-field_default('op','sub','qqq');
-field_default('op','ses',1); 
+% field_default('op','sub','qqq');
+% field_default('op','ses',1); 
+
+op.sub = 'pilot1'; 
+op.ses = 2; 
 
 op.show_mic_trace_figure = 0; % if false, make mic trace figure invisible
         
@@ -80,11 +83,11 @@ op.go_stim_dur = 4.5; % duration in sec of visual cue instructing speech onset
 op.task = 'irani23'; 
 
 %%%%%%%%%%%% stimulus paradigm - see irani ea 2023, fig 1
-% op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
-op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
+op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
+% op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
 
 
-op.ntrials = 100; 
+op.ntrials = 50; 
 op.allow_same_first_letter_within_pair = 0; 
 op.word_list_master_filename = [dirs.stim, filesep, 'irani23_word_list_master.tsv']; 
 
@@ -92,7 +95,7 @@ op.word_list_master_filename = [dirs.stim, filesep, 'irani23_word_list_master.ts
 op.ortho_font_size = 70; 
 op.background_color = [0 0 0]; % text will be inverse of this color
 
-op.ntrials_between_breaks = 34; %%%% not currently implemented
+op.ntrials_between_breaks = 50; %%%% not currently implemented
 
 
 
@@ -519,11 +522,15 @@ CLOCK=[];                               % Main clock (not yet started)
 switch op.stim_prdm
     case 'cue_word'
         instruct_msg = {'On each trial, first look at the cross in the center of the screen.','',...
-            'Two made-up words will appear.','',...
-            'Say these two words as quickly and accurately as possible.'};
+            'Two made-up words will show on screen.','',...
+            'Say these two words as soon as they appear.'}; 
+            % 'Say these two words as quickly and accurately as possible.'};
+
     case 'word_go'
         instruct_msg = {'On each trial, you will see two made-up words appear.','',...
-            'Wait until you see the ''!!!'' appear, then say these two words as quickly and accurately as possible'};
+                    'Wait until you see the ''!!!'' appear, then say these two words.'}; 
+            % 'Wait until you see the ''!!!'' appear, then say these two words as quickly and accurately as possible'};
+
 
 end
 
