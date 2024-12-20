@@ -1,7 +1,5 @@
  %%% generate audio-video files for each trial
 
-% this version only cuts video, not audio
-
  op.sub = 'pilot001'; 
  op.ses = 1; 
  op.run = 1; 
@@ -27,7 +25,6 @@ dirs.trial_video = [dirs.src_av, filesep, 'task-',op.task, '_run-',num2str(op.ru
 % load files, make trials video dir
 ldmks = readtable(landmarks_file,'FileType','text'); 
 recording_file = [dirs.src_av, filesep, ldmks.file{string(ldmks.computer)=='recording'}]; 
-run_vid_ob = VideoReader(recording_file);
 mkdir(dirs.trial_video); 
 
 trials = readtable(trial_table_tsv,'FileType','text'); 
@@ -51,28 +48,15 @@ for itrial = 1:ntrials
     % trials.t_voice_onset(itrial) = tData.voiceOnsetTime;
 
     %%%%%%%%% cut video trials
-    % Calculate the frame numbers corresponding to the timepoints
-    startFrame = floor([trials.t_go_on(itrial)+video_time_minus_stimcomp_time] * run_vid_ob.FrameRate);
-    endFrame = floor([trials.t_go_on(itrial) + video_time_minus_stimcomp_time + op.trialdur] * run_vid_ob.FrameRate);
+    % Calculate  timepoints
+    time_trial_start =  trials.t_go_on(itrial) + video_time_minus_stimcomp_time; 
+    time_trial_end = trials.t_go_on(itrial) + video_time_minus_stimcomp_time + op.trialdur;
 
-    % Create a VideoWriter object for the output
-    trial_video_filename = [dirs.trial_video, filesep, getfname(recording_file), '_trial-',num2str(itrial)]; 
-    trial_vid_ob = VideoWriter(trial_video_filename);
-    trial_vid_ob.FrameRate = run_vid_ob.FrameRate;
-    open(trial_vid_ob);
+    trial_video_filename = [dirs.trial_video, filesep, getfname(recording_file), '_trial-',num2str(itrial), '.avi']; 
+       ffmpeg_command = sprintf(...
+            'ffmpeg -y -i "%s" -ss %f -to %f -c copy "%s"', ... %%%%%%%% the -y flag will overwrite pre-existing trial files
+            recording_file, time_trial_start, time_trial_end, trial_video_filename);
 
-    % Read and write the frames for the current segment
-    for k = startFrame:endFrame
-        frame = read(run_vid_ob, k);
-        writeVideo(trial_vid_ob, frame);
-    end
-
-    close(trial_vid_ob); %clear startFrame endFrame trial_video_filename frame
-
-
+       [status, cmdout] = system(ffmpeg_command);
 end
 
-
-
-% Close the VideoReader
-close(run_vid_ob);
