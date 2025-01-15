@@ -1,12 +1,12 @@
 {
     "visual": "figure",
-    "root": "C:\\ieeg_stut_data",
+    "root": "C:\\ieeg_stut",
     "audiopath": "C:\\docs\\code\\ieeg_stut\\stimuli\\audio",  
     "figurespath": "C:\\docs\\code\\ieeg_stut\\stimuli\\figures",
     "subject": "qqq",
     "session": 1,
     "run": 1,
-    "task": "jackson2020",
+    "task": "jackson20",
     "gender": "unspecified",
     "scan": false,
     "timePostStim": [

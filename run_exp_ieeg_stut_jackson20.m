@@ -58,16 +58,20 @@ beepoffset = 0.100;
 %       deviceScan                  : device name for scanner trigger (see audiodevinfo().output.Name for details)
 %
 
+op.preview_answer_to_subject = 1; %%% if true, orthography of the expected answer will be shown to the subject before investigator asks question
+    op.preview_answer_duration = 2; % duration of preview in sec
+
 show_mic_trace_figure = 0; % if false, make mic trace figure invisible
         
-anticipation_dur_sec = 5; % wait period between experimenter finishing question and playing of the GO beep and green screen
-experimenter_warning_latency_sec = 0.8; % warn experimenter this soon before the screen turns green
+op.anticipation_dur_sec = 2; % wait period between experimenter finishing question and playing of the GO beep and green screen
+op.experimenter_warning_latency_sec = 0.8; % warn experimenter this soon before the screen turns green
 
-ntrials_between_breaks = 34; %%%% not currently implemented, because experimenter has control of pausing at every trial
+op.ntrials_between_breaks = 34; %%%% not currently implemented, because experimenter has control of pausing at every trial
 
 manually_choose_config_file = 0; % if false, use default config file C:\docs\code\ieeg_stut\config\ieeg_stut_jackson20.json
 
-ortho_font_size = 70; % not currently used - no orthography
+op.background_color = [0 0 0]; % text will be inverse of this color
+op.ortho_font_size = 120; %  used for Answer preview
 
 pause('on') % enable to use of pause.m to hold code execution until keypress
 
@@ -336,12 +340,8 @@ for n=1:numel(out_dropbox)
 end
 
 % visual setup
-if strcmp(expParams.visual, 'figure')
-    annoStr = setUpVisAnnot_HW([1 1 1]);
-else
-    annoStr = setUpVisAnnot_HW([0 0 0]);
-end
-annoStr.Stim.FontSize = ortho_font_size; 
+annoStr = setUpVisAnnot_HW(op);
+annoStr.Stim.FontSize = op.ortho_font_size; 
 
 CLOCKp = ManageTime('start');
 TIME_PREPARE = 0.5; % Waiting period before experiment begin (sec)
@@ -365,7 +365,7 @@ NoNull = find(~strcmp(Input_files_temp, 'NULL'));
 
 % load words table
 trials_words_file = [filepath, filesep, 'sub-',expParams.subject, '_ses-',num2str(expParams.session), '_run-',num2str(expParams.run), '_task-',expParams.task, '_trials-words.tsv'];
-trials_words = readtable(trials_words_file,'FileType','text');
+trials_words = readtable(trials_words_file,'FileType','text','Delimiter','\t'); % must specify delimiter or certain characters like ? cause problems
 
 if ispc
     Input_files=arrayfun(@(x)fullfile(expParams.audiopath, expParams.task, strcat(strrep(x, '/', '\'), '.wav')), Input_files_temp);
@@ -524,10 +524,24 @@ for itrial = 1:expParams.numTrials
         '\n      Answer = ''',trials_words.word{itrial}, '''',...
         '\n      ........ Trial ', num2str(itrial), '/' num2str(expParams.numTrials), ', Run ', num2str(expParams.run), ...
         next_trial_string,...
-        '\n      As you finish asking this trial''s question, please press Spacebar to start the ', num2str(anticipation_dur_sec), ' second anticipation period',...
+        '\n      As you finish asking this trial''s question, please press Spacebar to start the ', num2str(op.anticipation_dur_sec), ' second anticipation period',...
         '\n']);
 
-    % % % % % % % if (mod(itrial,ntrials_between_breaks) == 0) && (itrial ~= expParams.numTrials)  % Break after every X trials  , but not on the last
+    %%% for the 'Answer-Question' veresion of the task to be run remotely, show preview of answer
+    if op.preview_answer_to_subject %%% if true, orthography of the expected answer will be shown to the subject before investigator asks question
+        set(annoStr.Stim,'String',trials_words.word{itrial})
+        set(annoStr.Stim,'FontSize', op.ortho_font_size); 
+        set(annoStr.Stim,'Visible','on'); 
+
+        pause(op.preview_answer_duration) % time allowed for subject to read Answer on screen
+
+        set(annoStr.Stim,'Visible','off'); 
+        set(annoStr.Plus, 'Visible','on'); % switch back to fixation cross - cue for investigator to start asking question
+    end
+
+
+
+    % % % % % % % if (mod(itrial,op.ntrials_between_breaks) == 0) && (itrial ~= expParams.numTrials)  % Break after every X trials  , but not on the last
     % % % % % % %     pause()
     % % % % % % % 
     % % % % % % % end
@@ -536,9 +550,9 @@ for itrial = 1:expParams.numTrials
     % .... after they press any key, proceed to anticipation period 
     pause()
 
-    pause(anticipation_dur_sec - experimenter_warning_latency_sec) % anticipation delay period
-    fprintf(['\nGO cue will appear in ' num2str(experimenter_warning_latency_sec) ' seconds. Please look toward the subject now.\n'])
-    pause(experimenter_warning_latency_sec) 
+    pause(op.anticipation_dur_sec - op.experimenter_warning_latency_sec) % anticipation delay period
+    fprintf(['\nGO cue will appear in ' num2str(op.experimenter_warning_latency_sec) ' seconds. Please look toward the subject now.\n'])
+    pause(op.experimenter_warning_latency_sec) 
 
     
     trialData(itrial).stimName = Input_files{itrial};
