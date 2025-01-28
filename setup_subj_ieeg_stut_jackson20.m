@@ -11,11 +11,11 @@ function setup_subj_ieeg_stut_jackson20(subjID)
 op.ses = 1; 
 op.run = 1; % need to add overwrite protection/checking
 
-% op.repetitions_per_word = 5; 
-op.repetitions_per_word = 1;
+op.repetitions_per_word = 5; 
+% op.repetitions_per_word = 1;
 
-% op.shuffle_list = 1;
-op.shuffle_list = 0;
+op.shuffle_list = 1;
+% op.shuffle_list = 0;
 
 %% should change paths so that they are all determined by set_paths_ieeg_stut
 

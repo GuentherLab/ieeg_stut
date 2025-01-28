@@ -58,12 +58,12 @@ beepoffset = 0.100;
 %       deviceScan                  : device name for scanner trigger (see audiodevinfo().output.Name for details)
 %
 
-op.preview_answer_to_subject = 1; %%% if true, orthography of the expected answer will be shown to the subject before investigator asks question
+op.preview_answer_to_subject = 0; %%% if true, orthography of the expected answer will be shown to the subject before investigator asks question
     op.preview_answer_duration = 2; % duration of preview in sec
-
+ 
 show_mic_trace_figure = 0; % if false, make mic trace figure invisible
         
-op.anticipation_dur_sec = 2; % wait period between experimenter finishing question and playing of the GO beep and green screen
+op.anticipation_dur_sec = 4; % wait period between experimenter finishing question and playing of the GO beep and green screen
 op.experimenter_warning_latency_sec = 0.8; % warn experimenter this soon before the screen turns green
 
 op.ntrials_between_breaks = 34; %%%% not currently implemented, because experimenter has control of pausing at every trial
