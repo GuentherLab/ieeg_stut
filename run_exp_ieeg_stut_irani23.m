@@ -69,7 +69,8 @@ vardefault('op',struct);
 % field_default('op','sub','qqq');
 % field_default('op','ses',1); 
 
-op.sub = 'pilot1'; 
+% op.sub = 'pilot1'; 
+op.sub = 'pilot004';
 op.ses = 2; 
 
 op.show_mic_trace_figure = 0; % if false, make mic trace figure invisible
@@ -83,8 +84,8 @@ op.go_stim_dur = 4.5; % duration in sec of visual cue instructing speech onset
 op.task = 'irani23'; 
 
 %%%%%%%%%%%% stimulus paradigm - see irani ea 2023, fig 1
-op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
-% op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
+% op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
+op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
 
 
 op.ntrials = 50; 
