@@ -805,10 +805,11 @@ for itrial = 1:op.ntrials
     % tData = trialData(itrial);
 
     % fName_trial will be used for individual trial files (which will live in the run folder)
-    fName_trial = fullfile(dirs.run,sprintf('sub-%s_ses-%d_run-%d_task-%s_trial-%d.mat',op.sub, op.ses, op.run, op.task, itrial));
+    fName_trial = fullfile(dirs.run,sprintf('sub-%s_ses-%d_task-%s_run-%d_trial-%d.mat',op.sub, op.ses, op.task, op.run, itrial));
     % save(fName_trial,'tData');
     trialdat = trials(itrial,:); 
-    save(fName_trial,'trialdat','op'); % save timing data for this trial
+    save(fName_trial,'trialdat','op'); % save timing data for this individual... do we really need these individual files? 
+    save(fname_trialtable,'trials','expParams','op','dirs') % save the updated whole trial timing table
 end
 
 % release(headwrite);
@@ -821,7 +822,7 @@ close all
 % experiment time
 expParams.elapsed_time = toc(ET)/60;    % elapsed time of the experiment
 fprintf('\nElapsed Time: %f (min)\n', expParams.elapsed_time)
-save(fname_trialtable,'trials','expParams','op','dirs') % save trial timing
+
 
 % % number of trials with voice onset detected
 % onsetCount = nan(expParams.numTrials,1);
