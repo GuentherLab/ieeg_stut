@@ -6,6 +6,8 @@ CMRR = true;
 % set priority for matlab to high for running experiments
 system(sprintf('wmic process where processid=%d call setpriority "high priority"', feature('getpid')));
 
+
+
 beepoffset = 0.100;
 
 %%%%%%%%%%%%%%% comments below mostly apply to original FLVoice_run script, not jackson20 protocol
@@ -82,13 +84,13 @@ manually_choose_config_file = 0; % if false, use default config file C:\docs\cod
 op.background_color = [0 0 0]; % text will be inverse of this color
 op.ortho_font_size = 120; %  used for Answer preview..... if stim window not maximized, font sizes larger than 100 may result in cut off orthography
 
-
+op.num_run_digits = 2; % number of digits to include in run number labels in filenames
 
 %% audio device setup
 
 pause('on') % enable to use of pause.m to hold code execution until keypress
 
-[~,computername] = system('hostname'); % might not work on non-windows machines
+[dirs, computername] = set_paths_ieeg_stut();
     computername = deblank(computername); 
 auddevs = audiodevinfo; 
     auddevs_in = {auddevs.input.Name};
@@ -119,7 +121,7 @@ else
                 default_audio_out = 'Speakers (Realtek(R) Audio)'; 
             end
         otherwise 
-            error('unknown computer; please add preferred devices to "audio device section" of flvoice_run.m')
+            error('unknown computer; please add preferred devices to "audio device section" of main experiment file')
     end
 end
 
@@ -212,6 +214,7 @@ else % if no preset config file defined
 end
 
 expParams.computer = host;
+runstring = sprintf(['%0',num2str(op.num_run_digits),'d'], expParams.run); % add zero padding
 
 for n=1:2:numel(varargin)-1, 
     assert(isfield(expParams,varargin{n}),'unrecognized option %s',varargin{n});
@@ -363,12 +366,15 @@ set(annoStr.Stim, 'Visible','on');
 
 
 % locate files
-filepath = fullfile(expParams.root, sprintf('sub-%s',expParams.subject), sprintf('ses-%d',expParams.session),'beh', expParams.task);
-Input_audname  = fullfile(filepath,sprintf('sub-%s_ses-%d_run-%d_task-%s_desc-stimulus.txt',expParams.subject, expParams.session, expParams.run, expParams.task));
-Input_condname  = fullfile(filepath,sprintf('sub-%s_ses-%d_run-%d_task-%s_desc-conditions.txt',expParams.subject, expParams.session, expParams.run, expParams.task));
-Output_name = fullfile(filepath,sprintf('sub-%s_ses-%d_run-%d_task-%s_desc-audio.mat',expParams.subject, expParams.session, expParams.run, expParams.task));
+dirs.task = fullfile(expParams.root, sprintf('sub-%s',expParams.subject), sprintf('ses-%d',expParams.session),'beh', expParams.task);
+dirs.run = [dirs.task, filesep, 'run-',runstring]; 
+mkdir(dirs.run) % make directory for trial files in this run
+Input_audname  = fullfile(dirs.task,sprintf('sub-%s_ses-%d_run-%s_task-%s_desc-stimulus.txt',expParams.subject, expParams.session, runstring, expParams.task));
+Input_condname  = fullfile(dirs.task,sprintf('sub-%s_ses-%d_run-%sd_task-%s_desc-conditions.txt',expParams.subject, expParams.session, runstring, expParams.task));
+desc_audio_filename = fullfile(dirs.task,sprintf('sub-%s_ses-%d_run-%s_task-%s_desc-audio.mat',expParams.subject, expParams.session, runstring, expParams.task));
 assert(~isempty(dir(Input_audname)), 'unable to find input file %s',Input_audname);
-if ~isempty(dir(Output_name))&&~isequal('Yes - overwrite', questdlg(sprintf('This subject %s already has an data file for this ses-%d_run-%d (task: %s), do you want to over-write?', expParams.subject, expParams.session, expParams.run, expParams.task),'Answer', 'Yes - overwrite', 'No - quit','No - quit')), return; end
+if ~isempty(dir(desc_audio_filename))&&~isequal('Yes - overwrite', questdlg(sprintf('This subject %s already has a data file for this ses-%d_run-%s (task: %s), do you want to overwrite?',...
+        expParams.subject, expParams.session, runstring, expParams.task),'Answer', 'Yes - overwrite', 'No - quit','No - quit')), return; end
 % read audio files and condition labels
 Input_files=regexp(fileread(Input_audname),'[\n\r]+','split');
 
@@ -376,7 +382,7 @@ Input_files_temp=Input_files(cellfun('length',Input_files)>0);
 NoNull = find(~strcmp(Input_files_temp, 'NULL'));
 
 % load words table
-trials_words_file = [filepath, filesep, 'sub-',expParams.subject, '_ses-',num2str(expParams.session), '_run-',num2str(expParams.run), '_task-',expParams.task, '_trials-words.tsv'];
+trials_words_file = [dirs.task, filesep, 'sub-',expParams.subject, '_ses-',num2str(expParams.session), '_run-',runstring, '_task-',expParams.task, '_trials-words.tsv'];
 trials_words = readtable(trials_words_file,'FileType','text','Delimiter','\t'); % must specify delimiter or certain characters like ? cause problems
 
 if ispc
@@ -458,11 +464,12 @@ deviceReader = audioDeviceReader(...
 if ~ismember(expParams.deviceHead, strOUTPUT), expParams.deviceHead=strOUTPUT{find(strncmp(lower(expParams.deviceHead),lower(strOUTPUT),numel(expParams.deviceHead)),1)}; end
 assert(ismember(expParams.deviceHead, strOUTPUT), 'unable to find match to deviceHead name %s',expParams.deviceHead);
 [ok,ID]=ismember(expParams.deviceHead, strOUTPUT);
-[twav, tfs] = audioread(fullfile(fileparts(which(mfilename)),'flvoice_run_beep.wav'));
+beepfile = [dirs.stim, filesep, 'audio', filesep, expParams.task, filesep, 'green_screen_beep.wav'];
+[twav, tfs] = audioread(beepfile);
 beepdur = numel(twav)/tfs;
 %stimID=info.output(ID).ID;
 %beepPlayer = audioplayer(twav*0.2, tfs, 24, info.output(ID).ID);
-beepread = dsp.AudioFileReader(fullfile(fileparts(which(mfilename)),'flvoice_run_beep.wav'), 'SamplesPerFrame', 2048);
+beepread = dsp.AudioFileReader(beepfile, 'SamplesPerFrame', 2048);
 %headwrite = audioDeviceWriter('SampleRate',beepread.SampleRate,'Device',expParams.deviceHead, 'SupportVariableSizeInput', true, 'BufferSize', 2048);
 headwrite = audioDeviceWriter('SampleRate',beepread.SampleRate,'Device',expParams.deviceHead);
 
@@ -498,7 +505,7 @@ end
 if strcmp(expParams.visual, 'figure'), imgBuf = arrayfun(@(x)imread(All_figures{x}), 1:length(All_figures),'uni',0); end
 
 pause(1);
-save(Output_name, 'expParams');
+save(desc_audio_filename, 'expParams');
 
 %Initialize trialData structure
 trialData = struct;
@@ -844,7 +851,7 @@ for itrial = 1:expParams.numTrials
 
     % fName_trial will be used for individual trial files (which will
     % live in the run folder)
-    fName_trial = fullfile(filepath,sprintf('sub-%s_ses-%d_task-%s_run-%d_trial-%d.mat',expParams.subject, expParams.session, expParams.task,expParams.run, itrial));
+    fName_trial = fullfile(dirs.run,sprintf('sub-%s_ses-%d_task-%s_run-%s_trial-%d.mat',expParams.subject, expParams.session, expParams.task, runstring, itrial));
     save(fName_trial,'tData');
 end
 
@@ -858,7 +865,7 @@ close all
 % experiment time
 expParams.elapsed_time = toc(ET)/60;    % elapsed time of the experiment
 fprintf('\nElapsed Time: %f (min)\n', expParams.elapsed_time)
-save(Output_name, 'expParams', 'trialData');
+save(desc_audio_filename, 'expParams', 'trialData');
 
 % number of trials with voice onset detected
 onsetCount = nan(expParams.numTrials,1);

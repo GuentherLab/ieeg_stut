@@ -53,13 +53,14 @@ else % analyzing on a local machine
             dirs.conn = [pkgdir filesep 'conn'];
             dirs.FLvoice  = [pkgdir filesep 'FLvoice'];
 
-            dirs.data = ['C:\ieeg_stut'];  
+            dirs.data = ['C:\ieeg_stut'];  % source data
         otherwise
             
             disp('Directory listings are not set up for this computer. Please check that your hostname is correct.');
             
             return
     end
+    
     
 
 end
@@ -72,9 +73,11 @@ end
 % stimuli
 dirs.stim = [dirs.projrepo, filesep, 'stimuli'];
 dirs.config = fullfile(dirs.projrepo, 'config');  % configuration files
+dirs.derivatives = [dirs.projrepo, filesep, 'der']; % derivatives of source data
 
 %% add paths to folders and subfolders
 paths_to_add = {dirs.projrepo;...
+                dirs.derivatives;...
                 dirs.spm;...
                 % paths.conn;...
                 % paths.FLvoice;...
