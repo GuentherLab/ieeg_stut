@@ -1,23 +1,21 @@
-subject	session	task	run	suffix	trialdur	cut_into_trials	notes
-pilot001	2	irani23	2	recording-phone	1.5	1	
-pilot001	2	irani23	3	recording-phone	1.5	1	
-pilot001	2	irani23	4	recording-phone	1.5	1	
-pilot001	2	irani23	4	recording-phone	1.5	1	
-pilot001	2	irani23	5	recording-phone	1.5	1	
-pilot001	2	irani23	6	recording-phone	1.5	1	
-pilot001	2	irani23	7	recording-phone	1.5	1	
-pilot001	1	jackson20	1	recording-phone-video_physio	4	0	already cut into trials with old script
-pilot002	2	irani23	9	recording-ipad	1.5	1	
-pilot002	2	irani23	10	recording-ipad	1.5	1	
-pilot002	2	jackson20	1	recording-ipad	4	1	
-pilot003	2	irani23	2	recording-orbit	4	1	
-pilot003	2	irani23	3	recording-orbit	4	1	
-pilot003	2	jackson20	1	recording-orbit	4	1	
-pilot004	2	jackson20	1	recording-orbit	4	1	there was a jackson20 run preceding this run, but all data/recordings for it got lost
-pilot004	2	jackson20	2	recording-orbit	4	1	
-pilot004	2	irani23	0	recording-orbit	0	0	lost matlab timing data; not sure what proper run number would be
-pilot004	2	irani23	0	recording-orbit	0	0	lost matlab timing data; not sure what proper run number would be
-pilot005	2	jackson20	1	recording-ipad	4	1	
-pilot005	2	irani23	0	recording-ipad	0	0	lost matlab timing data; not sure what proper run number would be
-pilot005	2	irani23	0	recording-ipad	0	0	lost matlab timing data; not sure what proper run number would be
-pilot005	2	jackson20	0	recording-ipad	4	1	
+subject	session	task	run	suffix	trialdur	cut_into_trials	make_beh_scoring_table	notes
+pilot001	2	irani23	2	recording-phone	4	0	1	
+pilot001	2	irani23	3	recording-phone	4	0	0	
+pilot001	2	irani23	4	recording-phone	4	0	0	
+pilot001	2	irani23	5	recording-phone	4	0	0	
+pilot001	2	irani23	6	recording-phone	4	0	0	
+pilot001	2	irani23	7	recording-phone	4	0	0	
+pilot001	1	jackson20	1	recording-phone-video_physio	4	0	1	already cut into trials with old script
+pilot002	2	irani23	9	recording-ipad	4	0	1	
+pilot002	2	irani23	10	recording-ipad	4	0	0	
+pilot002	2	jackson20	1	recording-ipad	4	0	1	
+pilot003	2	irani23	2	recording-orbit	4	0	1	
+pilot003	2	irani23	3	recording-orbit	4	0	0	
+pilot003	2	jackson20	1	recording-orbit	4	0	0	
+pilot004	2	jackson20	1	recording-orbit	4	0	1	"matlab beh data for pilot004 jackson ses 2 run 1 also appears to have been overwritten by pilot003 data .... also, there was a jackson20 run preceding this run, but all data/recordings for it got lost"
+pilot004	2	jackson20	2	recording-orbit	4	1	0	
+pilot004	2	irani23	0	recording-orbit	0	0	0	lost matlab timing data; not sure what proper run number would be
+pilot004	2	irani23	0	recording-orbit	0	0	0	lost matlab timing data; not sure what proper run number would be
+pilot005	2	jackson20	1	recording-ipad	4	1	1	
+pilot005	2	irani23	0	recording-ipad	0	0	0	lost matlab timing data; not sure what proper run number would be
+pilot005	2	irani23	0	recording-ipad	0	0	0	lost matlab timing data; not sure what proper run number would be

@@ -6,8 +6,6 @@ CMRR = true;
 % set priority for matlab to high for running experiments
 system(sprintf('wmic process where processid=%d call setpriority "high priority"', feature('getpid')));
 
-
-
 beepoffset = 0.100;
 
 %%%%%%%%%%%%%%% comments below mostly apply to original FLVoice_run script, not jackson20 protocol

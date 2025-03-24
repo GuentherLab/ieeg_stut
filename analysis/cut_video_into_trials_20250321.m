@@ -1,69 +1,96 @@
  %%% generate audio-video files for each trial
  % written for windows; ffmpeg path must be on the system path - see https://archive.ph/AQE03
 
+ clear
+
 [dirs, host] = set_paths_ieeg_stut(); 
+
+op.num_run_digits = 2; % must match the value used during data acquisition; usually 2 digits
+op.num_trials_digits = 3; % number of digits to include in trial number labels in filenames
 
 runs = readtable([dirs.projrepo, filesep, 'ieeg_stut_runs.tsv'],'FileType','text'); % load table of runs from all subs to cut into trial clips
 runs = runs(logical(runs.cut_into_trials),:);
 nrunrows = height(runs); 
 
+
 for irun = 1:nrunrows
-    sub = runs.subject{irun};
+    sub = runs.subject{irun}
     ses = runs.session(irun); 
     task = runs.task{irun};
     taskrun = runs.run(irun); % run label within this subject / session / task
+        runstring = sprintf(['%0',num2str(op.num_run_digits),'d'], taskrun); % add zero padding
     recording_file_suffix = runs.suffix{irun};
+    trialdur = runs.trialdur(irun);
     
-    dirs.src_ses = [dirs.data, filesep, 'sub-',op.sub, filesep, 'ses-',num2str(op.ses)]; 
-    dirs.src_task = [dirs.src_ses, filesep, 'beh', filesep, op.task]; 
-    dirs.src_trialdata = [dirs.src_task, filesep, 'trialdata']; 
+    dirs.src_ses = [dirs.data, filesep, 'sub-',sub, filesep, 'ses-',num2str(ses)]; 
+    dirs.src_task = [dirs.src_ses, filesep, 'beh', filesep, task]; 
+    dirs.src_trialdata = [dirs.src_task, filesep, 'run-',runstring]; 
     dirs.src_av = [dirs.src_ses, filesep, 'audio-video']; 
 
     dirs.der_sub = [dirs.derivatives, filesep, 'sub-',sub];
     dirs.annot = [dirs.der_sub, filesep, 'annot']; 
     
-    file_prepend = ['sub-',op.sub, '_ses-',num2str(op.ses), '_task-',op.task, '_run-',num2str(op.run),  '_']; 
-    trial_table_tsv = [dirs.src_task, filesep, file_prepend,'trials-words.tsv']; 
+    file_prepend = ['sub-',sub, '_ses-',num2str(ses), '_task-',task, '_run-',runstring,  '_']; 
     run_subj_video_file = [dirs.src_av, filesep, file_prepend, recording_file_suffix]; % video file to chop up
     landmarks_file = [dirs.annot, filesep, file_prepend,'landmarks.tsv'];
-    dirs.trial_video = [dirs.src_av, filesep, 'task-',op.task, '_run-',num2str(op.run), '_', getfname(recording_file_suffix), '_trials']; % store chopped up video here
+    dirs.trial_video = [dirs.der_sub, filesep, 'trial-videos', filesep, 'ses-',num2str(ses), '_task-',task, '_run-',runstring]; % store chopped up video here
     
     % load files, make trials video dir
-    ldmks = readtable(landmarks_file,'FileType','text'); 
+    ldmks = readtable(landmarks_file,'FileType','text','Delimiter','tab'); 
     recording_file = [dirs.src_av, filesep, ldmks.file{string(ldmks.computer)=='recording'}]; 
     mkdir(dirs.trial_video); 
     
-    trials = readtable(trial_table_tsv,'FileType','text'); 
+    switch task
+        case 'jackson20'
+            trial_table_tsv = [dirs.src_task, filesep, file_prepend,'trials-words.tsv']; 
+            trials = readtable(trial_table_tsv,'FileType','text'); 
+        case 'irani23'
+            load([dirs.src_task, filesep, file_prepend,'trials.mat'], 'trials')
+        otherwise
+            error('task not recognized')
+    end
+
     ntrials = height(trials);
     
     % sync
     video_time_minus_stimcomp_time = ldmks.time(string(ldmks.computer)=='recording') - ldmks.time(string(ldmks.computer)=='stim'); 
     
-    % could also get tData.s and tData.fs from each trial..... audio recording
+    % for jackson: could also get tData.s and tData.fs from each trial..... audio recording
     for itrial = 1:ntrials
         %%%%%%%% load and tabulate trial timing
-        load([dirs.src_trialdata, filesep, file_prepend, 'trial-', num2str(itrial), '.mat'])
-        trials.t_go_on(itrial) = tData.timingTrial(1); % referrred to as TIME_GOSIGNAL_ACTUALLYSTART in FLVoice_Run
-        trials.t_voice_on(itrial) = tData.timingTrial(2);  % referrred to as TIME_VOICE_START in FLVoice_Run
-    
-        %%%%%%% not yet sure what these times mean
-        % trials.t_stim(itrial) = tData.timeStim; 
-        % trials.t_poststim(itrial) = tData.timePostStim;
-        % trials.t_postonset(itrial) = tData.timePostOnset;
-        % trials.t_prestim(itrial) = tData.timePreStim;
-        % trials.t_voice_onset(itrial) = tData.voiceOnsetTime;
-    
-        %%%%%%%%% cut video trials
-        % Calculate  timepoints
-        time_trial_start =  trials.t_go_on(itrial) + video_time_minus_stimcomp_time; 
-        time_trial_end = trials.t_go_on(itrial) + video_time_minus_stimcomp_time + op.trialdur;
-    
-        trial_video_filename = [dirs.trial_video, filesep, getfname(recording_file), '_trial-',num2str(itrial), '.avi']; 
+        trial_filename = [dirs.src_trialdata, filesep, file_prepend, 'trial-', num2str(itrial), '.mat']; 
+        if ~exist(trial_filename,'file')
+            fprintf(['\n Missing trial file: %s \n'], trial_filename)
+        elseif exist(trial_filename,'file')
+            switch task
+                case 'jackson20'
+                    load(trial_filename)
+                    trials.t_go_on(itrial) = tData.timingTrial(1); % referred to as TIME_GOSIGNAL_ACTUALLYSTART in FLVoice_Run
+                    trials.t_voice_on(itrial) = tData.timingTrial(2);  % referred to as TIME_VOICE_START in FLVoice_Run
+                
+                    %%%%%%% not yet sure what these times mean
+                    % trials.t_stim(itrial) = tData.timeStim; 
+                    % trials.t_poststim(itrial) = tData.timePostStim;
+                    % trials.t_postonset(itrial) = tData.timePostOnset;
+                    % trials.t_prestim(itrial) = tData.timePreStim;
+                    % trials.t_voice_onset(itrial) = tData.voiceOnsetTime;
+                case 'irani23'
+                     %  GO timepoints should already irani trialtable
+            end
+        
+            %%%%%%%%% cut video trials
+            % Calculate  timepoints - both of these timepoints should already irani trialtable
+            time_trial_start =  trials.t_go_on(itrial) + video_time_minus_stimcomp_time; 
+            time_trial_end = trials.t_go_on(itrial) + video_time_minus_stimcomp_time + trialdur;
+        
+            trial_video_filename = [dirs.trial_video, filesep, getfname(recording_file), '_trial-',...
+                sprintf(['%0',num2str(op.num_trials_digits),'d'], itrial), '.avi']; % zero pad trial number
            ffmpeg_command = sprintf(...
                 'ffmpeg -y -i "%s" -ss %f -to %f -c copy "%s"', ... %%%%%%%% the -y flag will overwrite pre-existing trial files
                 recording_file, time_trial_start, time_trial_end, trial_video_filename);
-    
-           [status, cmdout] = system(ffmpeg_command);
+        
+            [status, cmdout] = system(ffmpeg_command);
+        end
     end
 
 

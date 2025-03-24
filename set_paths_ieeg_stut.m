@@ -73,7 +73,7 @@ end
 % stimuli
 dirs.stim = [dirs.projrepo, filesep, 'stimuli'];
 dirs.config = fullfile(dirs.projrepo, 'config');  % configuration files
-dirs.derivatives = [dirs.projrepo, filesep, 'der']; % derivatives of source data
+dirs.derivatives = [dirs.data, filesep, 'der']; % derivatives of source data
 
 %% add paths to folders and subfolders
 paths_to_add = {dirs.projrepo;...
