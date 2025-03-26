@@ -50,9 +50,21 @@ for irun = 1:nrunrows
         ntrials = height(trials);
         nancol = nan(ntrials,1);
         celcol = cell(ntrials,1); 
-        trials.stuttered = nancol;
         trials.unusable_trial = nancol;
         trials.notes = celcol; 
+        trials.trialnum = [1:ntrials]'; 
+
+        switch task
+            case 'jackson20'
+                trials.stuttered = nancol;
+                firstvars = {'question','word','stuttered'}; 
+            case 'irani23'
+                trials.stuttered_1 = nancol;
+                trials.stuttered_2 = nancol;
+                firstvars = {'word','stuttered_1','stuttered_2'}; 
+        end
+
+        trials = movevars(trials,{'trialnum',firstvars{:},'unusable_trial','notes'},'Before',1);
 
         writetable(trials,beh_scoring_filepath, 'FileType','text', 'Delimiter','tab')
     end

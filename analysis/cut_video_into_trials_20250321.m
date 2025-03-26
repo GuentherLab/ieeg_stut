@@ -80,8 +80,9 @@ for irun = 1:nrunrows
         
             %%%%%%%%% cut video trials
             % Calculate  timepoints - both of these timepoints should already irani trialtable
+            % time_trial_start =  trials.t_go_on(itrial) + video_time_minus_stimcomp_time; 
             time_trial_start =  trials.t_go_on(itrial) + video_time_minus_stimcomp_time; 
-            time_trial_end = trials.t_go_on(itrial) + video_time_minus_stimcomp_time + trialdur;
+            time_trial_end = time_trial_start + trialdur;
         
             trial_video_filename = [dirs.trial_video, filesep, getfname(recording_file), '_trial-',...
                 sprintf(['%0',num2str(op.num_trials_digits),'d'], itrial), '.avi']; % zero pad trial number
