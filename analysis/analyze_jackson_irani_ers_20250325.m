@@ -52,12 +52,32 @@ for irun = 1:nrunrows
 end
 
 % ERS
-for isubj = 1:nsubs
-    sub = subs.sub{isub};
-    
+subs.ers = subnan;
+
+%%% getting error when trying to run readtable on these .tsv files
+% for isub = [1 2 3 5]; % sub 4 missing data for now
+%     sub = subs.sub{isub};
+%     ers_filepath = [dirs.data, filesep, 'sub-',sub, filesep, 'ses-2', filesep, 'sub-',sub, '_ERS.tsv',]
+%     ers_tab = readtable(ers_filepath, 'FileType','text', 'Delimiter','tab');
+% end
 
 mean_jackson = mean(subs.st_prop_jackson)
     sem_jackson = std(subs.st_prop_jackson) / sqrt(nsubs)
 mean_irani = mean(subs.st_prop_irani)
     sem_irani = std(subs.st_prop_irani) / sqrt(nsubs)    
 [~, p_irani_vs_jackson] = ttest(subs.st_prop_jackson, subs.st_prop_irani)
+
+subs.ers(1) = 1.28571428571429;
+subs.ers(2) = 1.47619047619048; 
+subs.ers(3) = 2.0952380952381; 
+subs.ers(5) = 2.15; 
+
+subs.irani_jackson_ratio = subs.st_prop_irani ./ subs.st_prop_jackson; 
+subs.irani_jackson_dif = subs.st_prop_irani - subs.st_prop_jackson;
+    
+subs = subs([1 2 3 5],:); % sub 4 missing data for now
+
+[r_ers_irani_jackson_ratio, p_ers_irani_jackson_ratio] = corrcoef(subs.ers, subs.irani_jackson_ratio)
+[r_ers_irani_jackson_dif, p_ers_irani_jackson_dif] = corrcoef(subs.ers, subs.irani_jackson_dif)
+
+
