@@ -8,11 +8,11 @@ function setup_subj_ieeg_stut_jackson20(subjID)
 % to generated a dummy list, can use the following ChatGPT prompt:.....
 %    ..."generate a list of 10 words that are likely to elicit stuttering and a list of 10 words that are not likely to elicit stuttering" 
 
-op.ses = 2; 
+op.ses = 1; 
 op.run = 1; % need to add overwrite protection/checking
 
-op.repetitions_per_word = 5; 
-% op.repetitions_per_word = 1; % use for remote session
+% op.repetitions_per_word = 5; 
+op.repetitions_per_word = 1; % use for remote session
 
 % op.shuffle_list = 1;
 op.shuffle_list = 0;

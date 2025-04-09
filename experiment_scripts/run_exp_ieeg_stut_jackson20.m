@@ -63,12 +63,12 @@ beepoffset = 0.100;
 %%%%%%%%%%%% .... ideally, run on 2 screens, with Matlab on main screen and stim window on 2nd screen
 %%% if op.preview_answer_to_subject is true, orthography of the expected answer will be shown to the subject before investigator asks question
 % op.preview_answer_to_subject = 0; % use for in-person jackson20 task
-op.preview_answer_to_subject = 0; % use for remote session Answer-Question task
+op.preview_answer_to_subject = 1; % use for remote session Answer-Question task
     op.preview_answer_duration = 2; % duration of preview in sec
  
 % wait period between experimenter finishing question and playing of the GO beep and green screen
-op.anticipation_dur_sec = 4; % use for in-person jackson20 task
-% op.anticipation_dur_sec = 1; % use for remote session Answer-Question task
+% op.anticipation_dur_sec = 4; % use for in-person jackson20 task
+op.anticipation_dur_sec = 1; % use for remote session Answer-Question task
 
 show_mic_trace_figure = 0; % if false, make mic trace figure invisible
 

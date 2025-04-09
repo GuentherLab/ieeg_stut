@@ -10,7 +10,7 @@
 
 function [trials, stimops] = setup_subj_ieeg_stut_irani23(op)
 
-op.sub = 'pilot005';
+op.sub = 'DM1049';
 
 field_default('op','ntrials',50);
 field_default('op','allow_same_first_letter_within_pair',false); 
