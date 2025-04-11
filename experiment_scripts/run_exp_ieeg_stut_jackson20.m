@@ -9,21 +9,6 @@ system(sprintf('wmic process where processid=%d call setpriority "high priority"
 beepoffset = 0.100;
 
 %%%%%%%%%%%%%%% comments below mostly apply to original FLVoice_run script, not jackson20 protocol
-
-% FLVOICE_RUN runs audio recording&scanning session
-% [task]: 'train' or 'test'
-% 
-% INPUT:
-%    [root]/sub-[subject]/ses-[session]/beh/[task]/sub-[subject]_ses-[session]_run-[run]_task-[task]_desc-stimulus.txt     : INPUT list of stimulus NAMES W/O suffix (one trial per line; enter the string NULL or empty audiofiles for NULL -no speech- conditions)
-%    [root]/sub-[subject]/ses-[session]/beh/[task]/sub-[subject]_ses-[session]_run-[run]_task-[task]_desc-conditions.txt   : (optional) INPUT list of condition labels (one trial per line)
-%                                                                                                                     if unspecified, condition labels are set to stimulus filename
-%    [audiopath]/[task]/                       : path for audio stimulus files (.wav)
-%    [figurespath]/                            : path for image stimulus files (.png) [if any]
-%    The above should match names in stimulus.txt
-%
-% OUTPUT:
-%    [root]/sub-[subject]/ses-[session]/beh/[task]/sub-[subject]_ses-[session]_run-[run]_task-[task]_desc-audio.mat        : OUTPUT audio data (see FLVOICE_IMPORT for format details) 
-%
 %
 %
 % FLVOICE_RUN(option_name1, option_value1, ...)
@@ -36,8 +21,6 @@ beepoffset = 0.100;
 %       session                     : session number [1]
 %       run                         : run number [1]
 %       task                        : task name ['test']
-%       gender                      : subject gender ['unspecified']
-%       scan                        : true/false include scanning segment in experiment sequence [1] 
 %       timePostStim                : time (s) from end of the audio stimulus presentation to the GO signal (D1 in schematic above) (one value for fixed time, two values for minimum-maximum range of random times) [.25 .75] 
 %       timePostOnset               : time (s) from subject's voice onset to the scanner trigger (or to pre-stimulus segment, if scan=false) (D2 in schematic above) (one value for fixed time, two values for minimum-maximum range of random times) [4.5] 
 %       timeMax                     : maximum time (s) before GO signal and scanner trigger (or to pre-stimulus segment, if scan=false) (D3 in schematic above) (recording portion in a trial may end before this if necessary to start scanner) [5.5] 
@@ -51,11 +34,8 @@ beepoffset = 0.100;
 %       rmsBeepThresh               : voice onset detection: initial voice-onset root-mean-square threshold [.1]
 %       rmsThreshTimeOnset          : voice onset detection: mininum time (s) for intentisy to be above RMSThresh to be consider voice-onset [0.1] 
 %       rmsThreshTimeOffset         : voice offset detection: mininum time (s) for intentisy to be above and below RMSThresh to be consider voice-onset [0.25 0.25] 
-%       ipatDur                     : prescan sequence: prescan IPAT duration (s) [4.75] 
-%       smsDur                      : prescan sequence: prescan SMS duration (s) [7] 
 %       deviceMic                   : device name for sound input (microphone) (see audiodevinfo().input.Name for details)
 %       deviceHead                  : device name for sound output (headphones) (see audiodevinfo().output.Name for details) 
-%       deviceScan                  : device name for scanner trigger (see audiodevinfo().output.Name for details)
 %
 
 
@@ -466,9 +446,9 @@ beepfile = [dirs.stim, filesep, 'audio', filesep, expParams.task, filesep, 'gree
 [twav, tfs] = audioread(beepfile);
 beepdur = numel(twav)/tfs;
 %stimID=info.output(ID).ID;
-%beepPlayer = audioplayer(twav*0.2, tfs, 24, info.output(ID).ID);
+% beepPlayer = audioplayer(twav*0.2, tfs, 24, info.output(ID).ID);
 beepread = dsp.AudioFileReader(beepfile, 'SamplesPerFrame', 2048);
-%headwrite = audioDeviceWriter('SampleRate',beepread.SampleRate,'Device',expParams.deviceHead, 'SupportVariableSizeInput', true, 'BufferSize', 2048);
+% headwrite = audioDeviceWriter('SampleRate',beepread.SampleRate,'Device',expParams.deviceHead, 'SupportVariableSizeInput', true, 'BufferSize', 2048);
 headwrite = audioDeviceWriter('SampleRate',beepread.SampleRate,'Device',expParams.deviceHead);
 
 % checks values of timing variables
@@ -522,9 +502,6 @@ expParams.timeNULL = expParams.timeMax(1) + diff(expParams.timeMax).*rand;
 intvs = [];
 
 %% LOOP OVER TRIALS
-
-
-
 for itrial = 1:expParams.numTrials
 
     set(annoStr.Plus, 'Visible','on');
@@ -627,78 +604,7 @@ for itrial = 1:expParams.numTrials
 
 
 
-
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_STIM_START);
-    % % % % % TIME_STIM_ACTUALLYSTART = ManageTime('current', CLOCK);
-    % % % % % 
-    % % % % % 
-    % % % % %     set(annoStr.Plus, 'Visible','off');
-    % % % % %     imshow(imgBuf{figureseq{itrial}}, 'Parent', annoStr.Pic);
-    % % % % % 
-    % % % % %     %%%%%%% AM added this condition 'drawnow' 2023/12/6 to fix the fact that fig wasn't appearing at stim onset..... may be caused by only using 1 monitor
-    % % % % %     if ~show_mic_trace_figure
-    % % % % %         drawnow; 
-    % % % % %     end
-    % % % % % 
-    % % % % % if ~ok, fprintf('i am late for this trial TIME_STIM_START\n'); end
-    % % % % % 
-    % % % % % TIME_SOUND_START = TIME_STIM_ACTUALLYSTART + trialData(itrial).timePreSound;
-    % % % % % %ok=ManageTime('wait', CLOCK, TIME_SOUND_START - stimoffset);
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_SOUND_START);
-    % % % % % %for reference: stimPlayer = audioplayer(Input_sound{ii},Input_fs{ii}, 24, stimID);
-    % % % % % %play(stimPlayer);
-    % % % % % %sttInd=1; endMax=size(Input_sound{ii}, 1); while sttInd<endMax; headwrite(Input_sound{ii}(sttInd:min(sttInd+2047, endMax))); sttInd=sttInd+2048; end; reset(headwrite);
-    % % % % % TIME_SOUND_ACTUALLYSTART = ManageTime('current', CLOCK);
-    % % % % % while ~isDone(stimread); sound=stimread();headwrite(sound);end;release(stimread);reset(headwrite);
-    % % % % % TIME_SOUND_END = TIME_SOUND_ACTUALLYSTART + trialData(itrial).timeStim;           % stimulus ends
-    % % % % % if ~ok, fprintf('i am late for this trial TIME_SOUND_START\n'); end
-    % % % % % 
-    % % % % % TIME_ALLSTIM_END = TIME_SOUND_END + trialData(itrial).timePostSound;
-    % % % % % %TIME_ALLSTIM_END = TIME_SOUND_RELEASED + trialData(ii).timePostSound;
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_ALLSTIM_END);
-    % % % % % if strcmp(expParams.visual, 'orthography')
-    % % % % %     set(annoStr.Stim, 'Visible','off');
-    % % % % %     set(annoStr.Plus, 'Visible','on');
-    % % % % %     drawnow;
-    % % % % % end
-    % % % % % if ~ok, fprintf('i am late for this trial TIME_ALLSTIM_END\n'); end        
-    % % % % % 
-    % % % % % TIME_GOSIGNAL_START = TIME_ALLSTIM_END + trialData(itrial).timePostStim;          % GO signal time
-    % % % % % if  show_mic_trace_figure
-    % % % % %     set(micLine,'visible','off');set(micLineB,'visible','off');
-    % % % % % end
-    % % % % % 
-    % % % % % drawnow;
-    % % % % % 
-    % % % % % 
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_GOSIGNAL_START - beepoffset);     % waits for recorder initialization time
-    % % % % % [nill, nill] = deviceReader(); % note: this line may take some random initialization time to run; audio signal start (t=0) will be synchronized to the time when this line finishes running
-    % % % % % if ~ok, fprintf('i am late for this trial TIME_GOSIGNAL_START - beepoffset\n'); end
-    % % % % % 
-    % % % % % ok=ManageTime('wait', CLOCK, TIME_GOSIGNAL_START);     % waits for GO signal time
-    % % % % % %playblocking(beepPlayer)
-    % % % % % while ~isDone(beepread); sound=beepread();headwrite(sound);end;reset(beepread);reset(headwrite);
-    % % % % % %TIME_GOSIGNAL_RELEASED = ManageTime('current', CLOCK);
-    % % % % % %TIME_GOSIGNAL_ACTUALLYSTART = TIME_GOSIGNAL_RELEASED - beepdur; % actual time for GO signal 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % 
-    % % % % % 
     TIME_GOSIGNAL_ACTUALLYSTART = ManageTime('current', CLOCK); % actual time for GO signal 
-
-
-
-
-
-
-
-
 
 
 % show the green GO screen
