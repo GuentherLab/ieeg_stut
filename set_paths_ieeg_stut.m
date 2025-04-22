@@ -46,7 +46,7 @@ if strncmpi('scc-x02', host, 3) % Using SCC
 else % analyzing on a local machine
     switch host
             
-        case {'MSI','677-GUE-WL-0010'} % Andrew Meier laptop
+        case {'MSI','677-GUE-WL-0010', 'amsmeier'} % Andrew Meier laptop
             pkgdir = 'C:\docs\code';
             dirs.projrepo = [pkgdir filesep 'ieeg_stut']; 
             dirs.spm = [pkgdir filesep 'spm12'];

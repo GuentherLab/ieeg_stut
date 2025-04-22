@@ -91,13 +91,16 @@ else
                 default_audio_out = 'Realtek'; 
                     % default_audio_out = 'ARZOPA'; % portable screen speakers
             end
-        case 'MSI' % AM personal laptop
+        case 'MSI' % AM's MSI laptop
             default_audio_in = 'Microphone (Realtek(R) Audio)'; 
             if any(contains(auddevs_out,'Headphones (MP43250)') )   % if using bluetooth headphones
                 default_audio_out = 'Headphones (MP43250)'; 
             else
                 default_audio_out = 'Speakers (Realtek(R) Audio)'; 
             end
+        case 'amsmeier' % AM's AMD stryx laptop
+            default_audio_in = 'Microphone Array (Realtek(R) Audio) (Windows DirectSound)';
+            default_audio_out = 'Speakers (Realtek(R) Audio) (Windows DirectSound)'; 
         otherwise 
             error('unknown computer; please add preferred devices to "audio device section" of main experiment file')
     end
