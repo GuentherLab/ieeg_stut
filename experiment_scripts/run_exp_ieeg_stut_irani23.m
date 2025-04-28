@@ -69,13 +69,15 @@ vardefault('op',struct);
 % field_default('op','sub','qqq');
 % field_default('op','ses',1); 
 
-% op.sub = 'pilot1'; 
-op.sub = 'DM1049';
-op.ses = 1; 
+op.sub = 'pilot007'; 
+% op.sub = 'DM1049';
+op.ses = 2; 
 
 op.show_mic_trace_figure = 0; % if false, make mic trace figure invisible
         
-op.get_ready_stim_dur = 1; % duration in sec of the visual stimulus occurring before speech onset
+% op.get_ready_stim_dur = 1; % duration in sec of the visual stimulus occurring before speech onset
+op.get_ready_stim_dur = 1.7; % duration in sec of the visual stimulus occurring before speech onset
+
 
 op.prespeech_delay_dur = 0.5; % time in sec between offset of get-ready visual stim and the GO stim triggering speech onset
 
@@ -84,8 +86,8 @@ op.go_stim_dur = 5.5; % duration in sec of visual cue instructing speech onset
 op.task = 'irani23'; 
 
 %%%%%%%%%%%% stimulus paradigm - see irani ea 2023, fig 1
-% op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
-op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
+op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
+% op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
 
 
 op.ntrials = 50; 
@@ -136,6 +138,9 @@ else
             else
                 default_audio_out = 'Speakers (Realtek(R) Audio)'; 
             end
+        case 'amsmeier' % AM's AMD stryx laptop
+            default_audio_in = 'Microphone Array (Realtek(R) Audio)';
+            default_audio_out = 'Speakers (Realtek(R) Audio)'; 
         otherwise 
             error('unknown computer; please add preferred devices to "audio device section" of flvoice_run.m')
     end

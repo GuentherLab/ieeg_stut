@@ -42,19 +42,18 @@ beepoffset = 0.100;
 %%%%%%%%%%%% NOTE - if running experiment on single screen, pressing button to proceed in each trial may return focus to Matlab, hiding stim window from experimenter
 %%%%%%%%%%%% .... ideally, run on 2 screens, with Matlab on main screen and stim window on 2nd screen
 %%% if op.preview_answer_to_subject is true, orthography of the expected answer will be shown to the subject before investigator asks question
-op.preview_answer_to_subject = 0; % use for in-person jackson20 task
-% op.preview_answer_to_subject = 1; % use for remote session Answer-Question task
-    op.preview_answer_duration = 6; % duration of preview in sec
+% op.preview_answer_to_subject = 0; % use for in-person jackson20 task
+op.preview_answer_to_subject = 1; % use for remote session Answer-Question task
+    op.preview_answer_duration = 2; % duration of preview in sec
  
 % wait period between experimenter finishing question and playing of the GO beep and green screen
-op.anticipation_dur_sec = 4; % use for in-person jackson20 task
+% op.anticipation_dur_sec = 4; % use for in-person jackson20 task
 % op.anticipation_dur_sec = 1; % use for remote session Answer-Question task
-% op.anticipation_dur_sec = 0.0; % use for rtMRI piloting version
+op.anticipation_dur_sec = 0.5; % use for rtMRI piloting version
 
 show_mic_trace_figure = 0; % if false, make mic trace figure invisible
 
 op.experimenter_warning_latency_sec = 0.8; % warn experimenter this soon before the screen turns green
-% op.experimenter_warning_latency_sec = 0.0; 
 
 op.ntrials_between_breaks = 34; %%%% not currently implemented, because experimenter has control of pausing at every trial
 
@@ -62,9 +61,7 @@ op.ntrials_between_breaks = 34; %%%% not currently implemented, because experime
 manually_choose_config_file = 0; % if false, use default config file C:\docs\code\ieeg_stut\config\ieeg_stut_jackson20.json
 
 op.background_color = [0 0 0]; % text will be inverse of this color
-
-% op.ortho_font_size = 120; %  used for Answer preview..... if stim window not maximized, font sizes larger than 100 may result in cut off orthography
-op.ortho_font_size = 60; % for rtmri version with full sentences
+op.ortho_font_size = 120; %  used for Answer preview..... if stim window not maximized, font sizes larger than 100 may result in cut off orthography
 
 op.num_run_digits = 2; % number of digits to include in run number labels in filenames
 

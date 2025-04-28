@@ -1,5 +1,5 @@
 function setup_subj_ieeg_stut_jackson20(subjID)
-
+% 
 % Write experiment desc text files for implementation of Jackson et al. 2020 stuttering elicitaiton protocol
 % By Andrew Meier @ Guenther Lab, 2024
 %%%% you must already have a list of anticipated/unanticipated words 
@@ -11,11 +11,11 @@ function setup_subj_ieeg_stut_jackson20(subjID)
 op.ses = 2; 
 op.run = 1; % need to add overwrite protection/checking
 
-% op.repetitions_per_word = 5; 
-op.repetitions_per_word = 1; % use for remote session
+op.repetitions_per_word = 2; 
+% op.repetitions_per_word = 1; % use for remote session
 
-% op.shuffle_list = 1;
-op.shuffle_list = 0;
+op.shuffle_list = 1;
+% op.shuffle_list = 0;
 
 op.num_run_digits = 2; % number of digits to include in run number labels in filenames
 
@@ -32,7 +32,7 @@ taskpath = fullfile(projpath, sprintf('sub-%s', subjID),sprintf('ses-%d', op.ses
 if ~isfolder(taskpath); mkdir(taskpath); end
 
 % the following text file must already have been created and placed in taskpath
-unique_words_file = fullfile(taskpath, sprintf('sub-%s_ses-%d_run-%s_task-jackson20_word-list.tsv',subjID,op.ses,runstring));
+unique_words_file = fullfile(taskpath, sprintf('sub-%s_ses-%d_task-jackson20_run-%s_word-list.tsv',subjID,op.ses,runstring));
 unique_words = readtable(unique_words_file,'FileType','text');
 trials_words = repmat(unique_words, op.repetitions_per_word, 1); % copy each word repetitions_per_word times
 ntrials = height(trials_words); 
