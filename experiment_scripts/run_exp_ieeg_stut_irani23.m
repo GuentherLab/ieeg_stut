@@ -69,7 +69,7 @@ vardefault('op',struct);
 % field_default('op','sub','qqq');
 % field_default('op','ses',1); 
 
-op.sub = 'pilot007'; 
+op.sub = 'pilot009'; 
 % op.sub = 'DM1049';
 op.ses = 2; 
 
@@ -95,7 +95,8 @@ op.allow_same_first_letter_within_pair = 0;
 op.word_list_master_filename = [dirs.stim, filesep, 'irani23_word_list_master.tsv']; 
 
 
-op.ortho_font_size = 70; 
+% op.ortho_font_size = 70; 
+op.ortho_font_size = 140; 
 op.background_color = [0 0 0]; % text will be inverse of this color
 
 op.ntrials_between_breaks = 50; %%%% not currently implemented
