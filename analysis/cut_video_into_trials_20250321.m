@@ -1,5 +1,7 @@
  %%% generate audio-video files for each trial
  % written for windows; ffmpeg path must be on the system path - see https://archive.ph/AQE03
+%
+% before running this script, first run make_blank_annot_tables.m to create landmarks table, then fill out that table
 
  clear
 

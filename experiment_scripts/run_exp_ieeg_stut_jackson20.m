@@ -354,9 +354,9 @@ set(annoStr.Stim, 'Visible','on');
 dirs.task = fullfile(expParams.root, sprintf('sub-%s',expParams.subject), sprintf('ses-%d',expParams.session),'beh', expParams.task);
 dirs.run = [dirs.task, filesep, 'run-',runstring]; 
 mkdir(dirs.run) % make directory for trial files in this run
-Input_audname  = fullfile(dirs.task,sprintf('sub-%s_ses-%d_run-%s_task-%s_desc-stimulus.txt',expParams.subject, expParams.session, runstring, expParams.task));
-Input_condname  = fullfile(dirs.task,sprintf('sub-%s_ses-%d_run-%sd_task-%s_desc-conditions.txt',expParams.subject, expParams.session, runstring, expParams.task));
-desc_audio_filename = fullfile(dirs.task,sprintf('sub-%s_ses-%d_run-%s_task-%s_desc-audio.mat',expParams.subject, expParams.session, runstring, expParams.task));
+Input_audname  = fullfile(dirs.task,sprintf('sub-%s_ses-%d_task-%s_run-%s_desc-stimulus.txt',expParams.subject, expParams.session, expParams.task, runstring));
+Input_condname  = fullfile(dirs.task,sprintf('sub-%s_ses-%d_task-%s_run-%s_desc-conditions.txt',expParams.subject, expParams.session, expParams.task, runstring));
+desc_audio_filename = fullfile(dirs.task,sprintf('sub-%s_ses-%d_task-%s_run-%s_desc-audio.mat',expParams.subject, expParams.session, expParams.task, runstring));
 assert(~isempty(dir(Input_audname)), 'unable to find input file %s',Input_audname);
 if ~isempty(dir(desc_audio_filename))&&~isequal('Yes - overwrite', questdlg(sprintf('This subject %s already has a data file for this ses-%d_run-%s (task: %s), do you want to overwrite?',...
         expParams.subject, expParams.session, runstring, expParams.task),'Answer', 'Yes - overwrite', 'No - quit','No - quit')), return; end

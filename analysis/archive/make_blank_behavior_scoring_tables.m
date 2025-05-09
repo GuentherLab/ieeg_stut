@@ -1,6 +1,6 @@
 % script for generating tables for manual scoring of trials
 % ... get behavioral data from beh folders for each task
-% ... check whether these files alreaedy exist to avoid overwriting
+% ... check whether these files already exist to avoid overwriting
 %
 %   table contains an option for 'stuttered'; intended to use 0 (unambiguous fluent), 1 (ambiguous), or 2 (unambiguous stuttered)
 %`  ..... following jackson ea 2020 - doi 10.1044/2019_JSLHR-S-19-0173

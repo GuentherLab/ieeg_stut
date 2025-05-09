@@ -41,12 +41,12 @@ if op.shuffle_list
     trials_words = trials_words(randperm(ntrials), :); % shuffle
 end
 
-trials_words_save_path = fullfile(taskpath, sprintf('sub-%s_ses-%d_run-%s_task-jackson20_trials-words.tsv',subjID,op.ses,runstring));
+trials_words_save_path = fullfile(taskpath, sprintf('sub-%s_ses-%d_task-jackson20_run-%s_trials-words.tsv',subjID,op.ses,runstring));
 writetable(trials_words,trials_words_save_path, 'FileType','text', 'Delimiter','tab') % 
 
 % save visual stim list [all green screens]
 go_stim_list = repmat({'green_screen_beep'}, ntrials, 1);
-stim_save_path = fullfile(taskpath, sprintf('sub-%s_ses-%d_run-%s_task-jackson20_desc-stimulus.txt',subjID,op.ses,runstring));
+stim_save_path = fullfile(taskpath, sprintf('sub-%s_ses-%d_task-jackson20_run-%s_desc-stimulus.txt',subjID,op.ses,runstring));
 writetable(table(go_stim_list),stim_save_path,'WriteVariableNames',false) % writetable rather than writecell for use w/ older matlab versions
 
 

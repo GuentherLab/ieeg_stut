@@ -1,4 +1,4 @@
-subject	session	task	run	suffix	trialdur	cut_into_trials	make_beh_scoring_table	analyze	notes
+subject	session	task	run	suffix	trialdur	cut_into_trials	make_annot_tables	analyze	notes
 pilot001	2	irani23	2	recording-phone	4	0	1	1	
 pilot001	2	irani23	3	recording-phone	4	0	0	0	
 pilot001	2	irani23	4	recording-phone	4	0	0	0	
@@ -16,6 +16,10 @@ pilot004	2	jackson20	1	recording-orbit	4	0	0	0	"matlab beh data for pilot004 jac
 pilot004	2	jackson20	2	recording-orbit	4	0	1	1	
 pilot004	2	irani23	1	recording-orbit	0	0	0	1	lost matlab timing data; not sure what proper run number would be
 pilot004	2	irani23	2	recording-orbit	0	0	0	0	lost matlab timing data; not sure what proper run number would be
-pilot005	2	jackson20	1	recording-ipad	9	1	1	1	response sometimes comes a few sec after  tData.timingTrial(1)… use longer trial clip window
-pilot005	2	irani23	1	recording-ipad	0	1	0	1	lost matlab timing data; not sure what proper run number would be
-pilot005	2	irani23	2	recording-ipad	0	1	0	0	lost matlab timing data; not sure what proper run number would be
+pilot005	2	jackson20	1	recording-ipad	9	0	1	1	response sometimes comes a few sec after  tData.timingTrial(1)… use longer trial clip window
+pilot005	2	irani23	1	recording-ipad	0	0	0	1	lost matlab timing data; not sure what proper run number would be
+pilot005	2	irani23	2	recording-ipad	0	0	0	0	lost matlab timing data; not sure what proper run number would be
+pilot007	2	jackson20	1	recording-emeet	4	1	1	1	
+pilot007	2	jackson20	2	recording-emeet	4	0	0	0	lost matlab timing data
+pilot007	2	jackson20	3	recording-emeet	0	1	1	1	
+pilot007	2	irani23	3	recording-emeet	4	1	1	1	
