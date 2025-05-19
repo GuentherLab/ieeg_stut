@@ -69,9 +69,11 @@ vardefault('op',struct);
 % field_default('op','sub','qqq');
 % field_default('op','ses',1); 
 
-op.sub = 'pilot009'; 
+op.sub = 'qqq'; 
+% op.sub = 'pilot009'; 
 % op.sub = 'DM1049';
-op.ses = 2; 
+
+op.ses = 1; 
 
 op.show_mic_trace_figure = 0; % if false, make mic trace figure invisible
         
@@ -86,8 +88,8 @@ op.go_stim_dur = 5.5; % duration in sec of visual cue instructing speech onset
 op.task = 'irani23'; 
 
 %%%%%%%%%%%% stimulus paradigm - see irani ea 2023, fig 1
-op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
-% op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
+% op.stim_prdm = 'word_go'; % get-ready cue = word orthography..... GO cue = "!!!"
+op.stim_prdm = 'cue_word'; % get-ready cue = "+".... GO cue = word orthography
 
 
 op.ntrials = 50; 
@@ -96,12 +98,12 @@ op.word_list_master_filename = [dirs.stim, filesep, 'irani23_word_list_master.ts
 
 
 % op.ortho_font_size = 70; 
-op.ortho_font_size = 140; 
+op.ortho_font_size = 140; % use font size 140 in mock scanner
 op.background_color = [0 0 0]; % text will be inverse of this color
 
-op.ntrials_between_breaks = 50; %%%% not currently implemented
+op.ntrials_between_breaks = 50; %%%% 
 
-
+op.num_run_digits = 2; % number of digits to include in run number labels in filenames
 
 pause('on') % enable to use of pause.m to hold code execution until keypress
 
@@ -380,11 +382,12 @@ if nnz(rundirnums) == 0 % if there's not already a rundir here
 elseif nnz(rundirnums) > 0 % if there's already a rundir here
     op.run = max(rundirnums) + 1; % this run = latest run plus 1
 end
-dirs.run = [dirs.ses, filesep, 'run-', num2str(op.run,'%02.f')]; 
+runstring = sprintf(['%0',num2str(op.num_run_digits),'d'], op.run); % add zero padding
+dirs.run = [dirs.ses, filesep, 'run-', runstring]; 
 mkdir(dirs.run) ; clear dd rundirnames rundirnums
 
 % save stim list
-fname_trialtable = [dirs.ses, filesep, 'sub-',op.sub, '_ses-',num2str(op.ses), '_task-',op.task, '_run-',num2str(op.run), '_trials']; 
+fname_trialtable = [dirs.ses, filesep, 'sub-',op.sub, '_ses-',num2str(op.ses), '_task-',op.task, '_run-',runstring, '_trials']; 
 save(fname_trialtable,'trials','op','dirs')
 
 
@@ -811,7 +814,7 @@ for itrial = 1:op.ntrials
     % tData = trialData(itrial);
 
     % fName_trial will be used for individual trial files (which will live in the run folder)
-    fName_trial = fullfile(dirs.run,sprintf('sub-%s_ses-%d_task-%s_run-%d_trial-%d.mat',op.sub, op.ses, op.task, op.run, itrial));
+    fName_trial = fullfile(dirs.run,sprintf('sub-%s_ses-%d_task-%s_run-%s_trial-%d.mat',op.sub, op.ses, op.task, runstring, itrial));
     % save(fName_trial,'tData');
     trialdat = trials(itrial,:); 
     save(fName_trial,'trialdat','op'); % save timing data for this individual... do we really need these individual files? 

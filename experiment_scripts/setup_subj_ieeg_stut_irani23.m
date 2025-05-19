@@ -10,8 +10,6 @@
 
 function [trials, stimops] = setup_subj_ieeg_stut_irani23(op)
 
-op.sub = 'DM1049';
-
 field_default('op','ntrials',50);
 field_default('op','allow_same_first_letter_within_pair',false); 
 field_default('op','word_list_master_filename','C:\docs\code\ieeg_stut\stimuli\irani23_word_list_master.tsv');

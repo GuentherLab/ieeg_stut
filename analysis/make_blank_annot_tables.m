@@ -55,7 +55,7 @@ for irun = 1:nrunrows
     if exist(landmarks_filepath)
          fprintf(['\n Landmarks scoring file already exists, not overwriting:\n       %s \n'], beh_scoring_filepath)
     elseif ~exist(landmarks_filepath)
-        landmarks_blank_table = table([inf; inf],{'FILL IN COMPUTER NAME HERE';'FILL IN COMPUTER NAME HERE'},{'FILL IN FILENAME TO BE SYNCED HERE';'FILL IN FILENAME TO BE SYNCED HERE'},{'';''},...
+        landmarks_blank_table = table([inf; inf],{'recording';'stim'},{'FILL IN AUDIO/VIDEO FILE HERE';'FILL IN BEHAVIORAL TIMING FILE HERE'},{'DESCRIBE TIMEPOINT HERE';'DESCRIBE TIMEPOINT HERE'},...
             'VariableNames',{'time','computer','file','description'}); 
         writetable(landmarks_blank_table,landmarks_filepath, 'FileType','text', 'Delimiter','tab')
     end

@@ -77,7 +77,7 @@ for irun = 1:nrunrows
                     % trials.t_prestim(itrial) = tData.timePreStim;
                     % trials.t_voice_onset(itrial) = tData.voiceOnsetTime;
                 case 'irani23'
-                     %  GO timepoints should already irani trialtable
+                     %  GO timepoints should already be in irani trialtable - don't add anything
             end
         
             %%%%%%%%% cut video trials
@@ -88,9 +88,18 @@ for irun = 1:nrunrows
         
             trial_video_filename = [dirs.trial_video, filesep, getfname(recording_file), '_trial-',...
                 sprintf(['%0',num2str(op.num_trials_digits),'d'], itrial), '.avi']; % zero pad trial number
+
+
+
+           % ffmpeg_command = sprintf(...
+           %   'ffmpeg -y -i "%s" -ss %f -to %f -map 0 -c:v libx264 -force_key_frames "expr:gte(t,0)" -c:a aac -avoid_negative_ts make_zero "%s"', ...
+           %   recording_file, time_trial_start, time_trial_end, trial_video_filename);
+
            ffmpeg_command = sprintf(...
                 'ffmpeg -y -i "%s" -ss %f -to %f -c copy "%s"', ... %%%%%%%% the -y flag will overwrite pre-existing trial files
                 recording_file, time_trial_start, time_trial_end, trial_video_filename);
+
+
         
             [status, cmdout] = system(ffmpeg_command);
         end

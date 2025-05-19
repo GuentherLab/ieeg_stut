@@ -42,8 +42,8 @@ beepoffset = 0.100;
 %%%%%%%%%%%% NOTE - if running experiment on single screen, pressing button to proceed in each trial may return focus to Matlab, hiding stim window from experimenter
 %%%%%%%%%%%% .... ideally, run on 2 screens, with Matlab on main screen and stim window on 2nd screen
 %%% if op.preview_answer  _to_subject is true, orthography of the expected answer will be shown to the subject before investigator asks question
-op.preview_answer_to_subject = 0; % use for in-person jackson20 task
-% op.preview_answer_to_subject = 1; % use for remote session Answer-Question task
+% op.preview_answer_to_subject = 0; % use for in-person jackson20 task
+op.preview_answer_to_subject = 1; % use for remote session Answer-Question task
     op.preview_answer_duration = 4; % duration of preview in sec
  
 % wait period between experimenter finishing question and playing of the GO beep and green screen
@@ -367,7 +367,7 @@ Input_files_temp=Input_files(cellfun('length',Input_files)>0);
 NoNull = find(~strcmp(Input_files_temp, 'NULL'));
 
 % load words table
-trials_words_file = [dirs.task, filesep, 'sub-',expParams.subject, '_ses-',num2str(expParams.session), '_run-',runstring, '_task-',expParams.task, '_trials-words.tsv'];
+trials_words_file = [dirs.task, filesep, 'sub-',expParams.subject, '_ses-',num2str(expParams.session), '_task-',expParams.task, '_run-',runstring, '_trials-words.tsv'];
 trials_words = readtable(trials_words_file,'FileType','text','Delimiter','\t'); % must specify delimiter or certain characters like ? cause problems
 
 if ispc
