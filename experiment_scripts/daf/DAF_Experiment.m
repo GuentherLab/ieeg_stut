@@ -6,10 +6,13 @@ clc;   % Clear command window
 AssertOpenGL; % Ensure Psychtoolbox is available
 
 %% Prompt for saving
-saveData = input('Would you like to save session data and metadata? (y/n): ', 's');
+%saveData = input('Would you like to save session data and metadata? (y/n): ', 's');
+saveData='y'; % set for autosave
 doSave = strcmpi(saveData, 'y'); % Logical flag for saving
 
 %% Parameter settings
+Nblocks = 4; % Number of blocks
+pause_between_blocks = true; % Set to true to require keypress between blocks
 Fs = 44100; % Audio sample rate in Hz
 frameSize = 128; % Number of samples processed per audio frame
 audioGain = 2.0; % Output gain for delayed signal
@@ -61,23 +64,37 @@ if doSave % Only prompt if saving is enabled
     metaFileName = fullfile(dirs.run, [baseName '_desc-meta.mat']);
 end
 
-%% Load sentences
+%% Load sentences and block randomization (with preallocation)
 T = readtable('sentences.tsv', 'FileType','text', 'Delimiter','\t', 'ReadVariableNames',false);
 sentences = T.Var1; % Extract sentences as cell array
 nSentences = numel(sentences); % Number of sentences
 
-% Randomize trials
-[sentenceIdxGrid, delayIdxGrid] = ndgrid(1:nSentences, 1:numel(delayOptions)); % Build all (sentence, delay) pairs
-trialSentIdx = sentenceIdxGrid(:); % Sentence indices for each trial
-trialDelays = delayOptions(delayIdxGrid(:)); % Delay for each trial
-nTrials = numel(trialSentIdx); % Total number of trials
-randOrder = randperm(nTrials); % Shuffle trial order
-trialSentIdx = trialSentIdx(randOrder); % Randomized sentence order
-trialDelays = trialDelays(randOrder); % Randomized delays
-nCatch = round(nTrials * catchRatio); % Number of catch trials
-isCatch = false(nTrials, 1); % Initialize catch trial mask
+% For one block: all (sentence x delay) pairs
+[sentenceIdxGrid, delayIdxGrid] = ndgrid(1:nSentences, 1:numel(delayOptions));
+blockSentIdx = sentenceIdxGrid(:); % [nSentences*numel(delayOptions) x 1]
+blockDelays = delayOptions(delayIdxGrid(:)); % [nSentences*numel(delayOptions) x 1]
+blockNtrials = numel(blockSentIdx); % Number of trials per block
+nTrials = Nblocks * blockNtrials; % Total number of trials
+
+% Preallocate arrays for all trials
+trialSentIdx = zeros(nTrials, 1); % Sentence indices for all trials
+trialDelays = zeros(nTrials, 1); % Delay values for all trials
+trialBlock = zeros(nTrials, 1); % Block number for all trials
+trialCounter = 1; % Index for filling arrays
+for b = 1:Nblocks
+    blockOrder = randperm(blockNtrials); % Unique shuffle for this block
+    trialRange = trialCounter:(trialCounter + blockNtrials - 1);
+    trialSentIdx(trialRange) = blockSentIdx(blockOrder);
+    trialDelays(trialRange)  = blockDelays(blockOrder);
+    trialBlock(trialRange)   = b;
+    trialCounter = trialCounter + blockNtrials;
+end
+
+% Assign catch trials randomly across all trials
+nCatch = round(nTrials * catchRatio);
+isCatch = false(nTrials, 1);
 if nCatch > 0
-    isCatch(randperm(nTrials, nCatch)) = true; % Randomly assign catch trials
+    isCatch(randperm(nTrials, nCatch)) = true;
 end
 
 %% Audio setup
@@ -142,7 +159,7 @@ set(hText, 'String', ''); drawnow; % Clear after last beep
 if doSave
     logFile = fopen(logFileName, 'w'); % Open trial log
     fprintf(logFile, 'SYNC_TIME\t%s\n', char(syncTime)); % Write sync time
-    fprintf(logFile, 'fixation_onset\tsentence_onset\tsentence_offset\ttrial_type\tsentence\tdelay_ms\tis_catch\n'); % Header
+    fprintf(logFile, 'block\tfixation_onset\tsentence_onset\tsentence_offset\ttrial_type\tsentence\tdelay_ms\n'); % Updated header
 else
     logFile = [];
 end
@@ -202,9 +219,28 @@ for t = 1:nTrials
     drawnow; % Clear
     ITIstart = GetSecs;
     while (GetSecs - ITIstart) < ITI; end % Inter-trial interval
-    fprintf('Delay: %3d ms | %s | Sentence: %s | Visual On: %.3f s\n', delay_ms, ifelse(isSpeak,'Speaking','Catch'), sentence, visOn); % Console log
+
+    % Console log
+    fprintf('Block: %d | Delay: %3d ms | %s | Sentence: %s | Visual On: %.3f s\n', ...
+        trialBlock(t), delay_ms, ifelse(isSpeak,'Speaking','Catch'), sentence, visOn);
+
+    % Log file output (block, timings, type, sentence, delay)
     if doSave && ~isempty(logFile)
-        fprintf(logFile, '%.3f\t%.3f\t%.3f\t%s\t%s\t%d\t%d\n', fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), sentence, delay_ms, ~isSpeak); % Write to log
+        fprintf(logFile, '%d\t%.3f\t%.3f\t%.3f\t%s\t%s\t%d\n', ...
+            trialBlock(t), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), sentence, delay_ms);
+    end
+
+    %  Pause between blocks: if this is the last trial of the current block (but not the last trial overall), pause and wait for spacebar
+    if pause_between_blocks && t < nTrials && (t == find(trialBlock == trialBlock(t), 1, 'last'))
+        set(hText, 'String', sprintf('Block %d/%d finished.\nPress spacebar to continue.', ...
+            trialBlock(t), max(trialBlock)), 'FontSize', 28, 'Color', 'blue');
+        drawnow;
+        fprintf('Block %d/%d finished; press spacebar to continue...\n', trialBlock(t), max(trialBlock));
+        set(fig, 'WindowKeyPressFcn', @(src,evt) spacebarToContinue(src,evt,fig)); % Use nested function below
+        uiwait(fig); % Wait for spacebar
+        set(fig, 'WindowKeyPressFcn', '');
+        set(hText, 'String', '');
+        drawnow;
     end
     completedTrials = completedTrials + 1; % Increment trial count
 end
@@ -222,14 +258,22 @@ if doSave
     ts = trialSentIdx(1:completedTrials); % Final trial order
     td = trialDelays(1:completedTrials); % Final delays
     ic = isCatch(1:completedTrials); % Final catch mask
+    tb = trialBlock(1:completedTrials); % Final block numbers
     runMeta = struct('subject', subject, 'session', session, 'run', runNum, 'task', task, 'created_on', datestr(now), ...
         'catchRatio', catchRatio, 'delayOptions', delayOptions, 'sentDur', sentDur, 'fixDur', fixDur, 'ITI', ITI, ...
         'prepPause', prepPause, 'audioGain', audioGain, 'frameSize', frameSize, 'samplingRate', Fs, 'totalTrials', completedTrials, ...
-        'nCatchTrials', sum(ic(:)), 'trialOrder', table(ts(:), td(:), ic(:), 'VariableNames', {'trialSentIdx','trialDelays','isCatch'})); % Save all metadata for reproducibility
+        'nCatchTrials', sum(ic(:)), 'trialOrder', table(tb(:), ts(:), td(:), ic(:), 'VariableNames', {'trialBlock','trialSentIdx','trialDelays','isCatch'})); % Save all metadata for reproducibility
     save(metaFileName, 'runMeta'); % Save metadata
     fprintf('Metadata saved to: %s\n', metaFileName); % Confirm
 else
     fprintf('Session was not saved.\n'); % Confirm
+end
+
+%% Nested function for spacebar detection
+function spacebarToContinue(~, evt, figHandle) % Only resume if the pressed key is the spacebar
+    if strcmp(evt.Key, 'space')
+        uiresume(figHandle);
+    end
 end
 
 %% Helper function (Ternary operator: returns a if cond is true, else b)
