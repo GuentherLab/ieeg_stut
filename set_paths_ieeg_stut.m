@@ -54,6 +54,11 @@ else % analyzing on a local machine
             dirs.FLvoice  = [pkgdir filesep 'FLvoice'];
 
             dirs.data = ['C:\ieeg_stut'];  % source data
+
+        case {'sam_laptop'}
+            dirs.projrepo = [pkgdir filesep 'ieeg_stut']; 
+
+
         otherwise
             
             disp('Directory listings are not set up for this computer. Please check that your hostname is correct.');

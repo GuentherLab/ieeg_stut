@@ -72,6 +72,7 @@ vardefault('op',struct);
 op.sub = 'qqq'; 
 % op.sub = 'pilot009'; 
 % op.sub = 'DM1049';
+% op.sub = 'sap022'; 
 
 op.ses = 1; 
 
