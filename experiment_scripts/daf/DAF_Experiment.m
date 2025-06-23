@@ -12,20 +12,20 @@ saveData='y'; % set for autosave
 doSave = strcmpi(saveData, 'y'); % Logical flag for saving
 
 %% Parameter settings
-Nblocks = 4; % Number of blocks
-pause_between_blocks = 0; % Set to true to require keypress between blocks
-Fs = 44100; % Audio sample rate in Hz
-frameSize = 128; % Number of samples processed per audio frame
-audioGain = 15; % Output gain for delayed signal... might want to run volume calibration for each subject
-fixDur = 0.; % Duration of fixation cue (seconds)
-prepPause = 0.; % Pause between fixation and sentence onset (seconds)
-sentenceDur = 20.0; % Duration for which sentence is displayed and spoken (seconds)
-ITI = 2.0; % Inter-trial interval (seconds)
-font_size = 65; 
-maxCharPerLine = 38; % wrap text at this length
+op.n_blocks = 4; % Number of blocks
+op.pause_between_blocks = 0; % Set to true to require keypress between blocks
+op.audio_sample_rate = 44100; % Audio sample rate in Hz
+op.audio_frame_size = 128; % Number of samples processed per audio frame
+op.audio_playback_gain = 15; % Output gain for delayed signal... might want to run volume calibration for each subject
+op.fix_cross_dur = 0.; % Duration of fixation cue (seconds)
+op.delay_dur = 0.; % Pause between fixation and sentence onset (seconds)
+op.text_stim_dur = 20.0; % Duration for which sentence is displayed and spoken (seconds)
+op.iti = 2.0; % Inter-trial interval (seconds)
+op.stim_font_size = 65; 
+op.stim_max_char_per_line = 38; % wrap text at this length
 
-% delayOptions = [0, 150, 200, 250]; % DAF delay conditions in ms
-delayOptions = [150]; % DAF delay conditions in ms
+% delayOptions = [0, 150, 200, 250]; % DAF delay condop.itions in ms
+delayOptions = [150]; % DAF delay condop.itions in ms
 
 catchRatio = 0; 
 % catchRatio = 1/6; % Fraction of catch (no-speak) trials
@@ -66,14 +66,14 @@ nSentences = numel(sentences); % Number of sentences
 blockSentIdx = sentenceIdxGrid(:); % [nSentences*numel(delayOptions) x 1]
 blockDelays = delayOptions(delayIdxGrid(:)); % [nSentences*numel(delayOptions) x 1]
 blockNtrials = numel(blockSentIdx); % Number of trials per block
-nTrials = Nblocks * blockNtrials; % Total number of trials
+nTrials = op.n_blocks * blockNtrials; % Total number of trials
 
 % Preallocate arrays for all trials
 trialSentIdx = zeros(nTrials, 1); % Sentence indices for all trials
 trialDelays = zeros(nTrials, 1); % Delay values for all trials
 trialBlock = zeros(nTrials, 1); % Block number for all trials
 trialCounter = 1; % Index for filling arrays
-for b = 1:Nblocks
+for b = 1:op.n_blocks
     blockOrder = randperm(blockNtrials); % Unique shuffle for this block
     trialRange = trialCounter:(trialCounter + blockNtrials - 1);
     trialSentIdx(trialRange) = blockSentIdx(blockOrder);
@@ -95,7 +95,7 @@ for k = 1:length(input_devices)
     fprintf('%d: %s\n', k, input_devices{k});
 end
 inIdx = input('INPUT device #: '); % User selects input device
-reader = audioDeviceReader('SampleRate', Fs, 'SamplesPerFrame', frameSize, 'Device', input_devices{inIdx}); % Live mic input
+reader = audioDeviceReader('SampleRate', op.audio_sample_rate, 'SamplesPerFrame', op.audio_frame_size, 'Device', input_devices{inIdx}); % Live mic input
 
 output_devices = getAudioDevices(audioDeviceWriter); % List available audio output devices
 for k = 1:length(input_devices)
@@ -103,18 +103,18 @@ for k = 1:length(input_devices)
 end
 outIdx = input('OUTPUT device #: '); % User selects output device
 
-writer = audioDeviceWriter('SampleRate', Fs, 'Device', output_devices{outIdx}); % Speaker output
-vfd = dsp.VariableFractionalDelay('MaximumDelay', round(Fs * 0.5)); % Delay buffer for DAF
+writer = audioDeviceWriter('SampleRate', op.audio_sample_rate, 'Device', output_devices{outIdx}); % Speaker output
+vfd = dsp.VariableFractionalDelay('MaximumDelay', round(op.audio_sample_rate * 0.5)); % Delay buffer for DAF
 for k = 1:10, writer(reader()); end % Prime audio pipeline (avoid startup glitch)
 maxDelay_ms = max(delayOptions); % Find largest delay (ms)
-maxDelayFrames = ceil((maxDelay_ms/1000) * Fs / frameSize) + 5; % Max delay in frames, add buffer
+maxDelayFrames = ceil((maxDelay_ms/1000) * op.audio_sample_rate / op.audio_frame_size) + 5; % Max delay in frames, add buffer
 
 %% GUI setup
 screenSize = get(0, 'ScreenSize'); % Get screen size for centering
 fig = figure('Name','DAF','Color','white','MenuBar','none','ToolBar','none','Position',[screenSize(3)/4 screenSize(4)/4 900 600],'NumberTitle','off'); % Main experiment window
 ax = axes('Parent',fig,'Position',[0 0 1 1],'Visible','off'); % Invisible axes for center-center text
 hText = text(0.5, 0.5, '', ...
-    'FontSize', font_size, ...
+    'FontSize', op.stim_font_size, ...
     'FontWeight', 'bold', ...
     'HorizontalAlignment', 'center', ...
     'VerticalAlignment', 'middle', ...
@@ -139,14 +139,14 @@ set(fig, 'WindowKeyPressFcn', @(~,~) uiresume(fig)); % Resume on any key
 uiwait(fig); % Wait for user keypress
 set(fig, 'WindowKeyPressFcn', ''); % Remove keypress handler
 set(hText, 'String', ''); drawnow; % Clear text
-beepWave = 0.1 * sin(2*pi*1000*(0:1/Fs:0.2)); % 200ms, 1kHz beep
+beepWave = 0.1 * sin(2*pi*1000*(0:1/op.audio_sample_rate:0.2)); % 200ms, 1kHz beep
 set(hText, 'String', 'SYNC', 'FontSize', 48, 'Color', 'red'); drawnow; % Show sync message
 syncTime = datetime('now', 'Format', 'yyyy-MM-dd HH:mm:ss.SSS'); % Log sync time (for aligning with other systems)
 for i = 1:3
     if i == 1
         refTime = GetSecs; % Start experiment timer at first beep
     end
-    sound(beepWave, Fs);
+    sound(beepWave, op.audio_sample_rate);
     pause(0.5);
 end
 set(hText, 'String', ''); drawnow; % Clear after last beep
@@ -155,7 +155,8 @@ set(hText, 'String', ''); drawnow; % Clear after last beep
 if doSave
     logFile = fopen(logFileName, 'w'); % Open trial log
     fprintf(logFile, 'SYNC_TIME\t%s\n', char(syncTime)); % Write sync time
-    fprintf(logFile, 'block\tfixation_onset\tsentence_onset\tsentence_offset\ttrial_type\tsentence\tdelay_ms\n'); % Updated header
+    fprintf(logFile, 'block\tfixation_onset\tsentence_onset\tsentence_ofop.audio_sample_rateet\ttrial_type\tsentence\tdelay_ms\n'); % Updated header
+    save(metaFileName,'op'); % Save metadata
 else
     logFile = [];
 end
@@ -165,33 +166,33 @@ lagBuffer = zeros(1, 5000); lagIndex = 1; lagCount = 0; completedTrials = 0; % B
 for t = 1:nTrials
     if getappdata(0, 'stopReq'), break; % Stop if pressed
     end
-    sIdx = trialSentIdx(t); delay_ms = trialDelays(t); delay_samples = Fs * delay_ms / 1000; % Trial parameters
+    sIdx = trialSentIdx(t); delay_ms = trialDelays(t); delay_samples = op.audio_sample_rate * delay_ms / 1000; % Trial parameters
     text_stim = sentences{sIdx}; isSpeak = ~isCatch(t); % Sentence text, trial type
-    text_stim_wrapped = textwrap({text_stim},maxCharPerLine); 
+    text_stim_wrapped = textwrap({text_stim},op.stim_max_char_per_line); 
     for i = 1:maxDelayFrames
-        writer(zeros(frameSize,1)); % Flush output buffer
-        vfd(zeros(frameSize,1), delay_samples); % Flush delay buffer
+        writer(zeros(op.audio_frame_size,1)); % Flush output buffer
+        vfd(zeros(op.audio_frame_size,1), delay_samples); % Flush delay buffer
     end
     vfd.reset(); % Reset delay state
-    set(hText, 'String', '*', 'FontSize', font_size, 'Color', ifelse(isSpeak, [0.7 0.7 0.7], 'red')); % Show asterisk cue
+    set(hText, 'String', '*', 'FontSize', op.stim_font_size, 'Color', ifelse(isSpeak, [0.7 0.7 0.7], 'red')); % Show asterisk cue
     drawnow;
     fixOn = GetSecs - refTime; % Log fixation onset
     fixStart = GetSecs;
-    while (GetSecs - fixStart) < fixDur; end % Hold for fixation duration
+    while (GetSecs - fixStart) < op.fix_cross_dur; end % Hold for fixation duration
     set(hText, 'String', '');
     drawnow; % Clear
-    WaitSecs(prepPause); % Pre-sentence pause
-    set(hText, 'String', text_stim_wrapped, 'FontSize', font_size, 'Color', 'black'); drawnow; % Show sentence
+    WaitSecs(op.delay_dur); % Pre-sentence pause
+    set(hText, 'String', text_stim_wrapped, 'FontSize', op.stim_font_size, 'Color', 'black'); drawnow; % Show sentence
     visOn = GetSecs - refTime; % Log sentence onset
     if isSpeak && delay_ms > 0 % Only do DAF if not catch and delay > 0
-        DAFstart = GetSecs;
+        DAop.audio_sample_ratetart = GetSecs;
         frameCounter = 0;
-        while (GetSecs - DAFstart) < sentenceDur && ~getappdata(0,'stopReq') % While within trial duration and not stopped
+        while (GetSecs - DAop.audio_sample_ratetart) < op.text_stim_dur && ~getappdata(0,'stopReq') % While within trial duration and not stopped
             tStart = GetSecs; % Start timing for this frame
             audioIn = reader(); delayed = vfd(audioIn, delay_samples); % Get input, apply delay
-            audioOut = max(min(audioGain * delayed, 1), -1); % Apply gain, clip to [-1,1]
+            audioOut = max(min(op.audio_playback_gain * delayed, 1), -1); % Apply gain, clip to [-1,1]
             writer(audioOut); % Output delayed audio
-            lag = max((GetSecs - tStart)*1000 - (frameSize/Fs*1000), 0); % Compute audio processing lag in ms
+            lag = max((GetSecs - tStart)*1000 - (op.audio_frame_size/op.audio_sample_rate*1000), 0); % Compute audio processing lag in ms
             lagBuffer(lagIndex) = lag; % Store lag
             lagIndex = mod(lagIndex, 5000) + 1; % Circular buffer
             lagCount = min(lagCount+1, 5000);
@@ -202,20 +203,20 @@ for t = 1:nTrials
             pause(0.001); % Prevent CPU slowing
         end
         for i = 1:maxDelayFrames
-            audioOut = vfd(zeros(frameSize,1), delay_samples); % Flush remaining delayed audio
+            audioOut = vfd(zeros(op.audio_frame_size,1), delay_samples); % Flush remaining delayed audio
             writer(audioOut);
         end
         vfd.reset();
         WaitSecs(0.1); % Short pause to finish playback
     else
         sentStart = GetSecs;
-        while (GetSecs - sentStart) < sentenceDur; end % Wait for sentence duration if not DAF
+        while (GetSecs - sentStart) < op.text_stim_dur; end % Wait for sentence duration if not DAF
     end
-    visOff = GetSecs - refTime; % Log sentence offset
+    visOff = GetSecs - refTime; % Log sentence ofop.audio_sample_rateet
     set(hText, 'String', '');
     drawnow; % Clear
-    ITIstart = GetSecs;
-    while (GetSecs - ITIstart) < ITI; end % Inter-trial interval
+    op.itistart = GetSecs;
+    while (GetSecs - op.itistart) < op.iti; end % Inter-trial interval
 
     % Console log
     fprintf('Block: %d | Delay: %3d ms | %s | Sentence: %s | Visual On: %.3f s\n', ...
@@ -228,7 +229,7 @@ for t = 1:nTrials
     end
 
     %  Pause between blocks: if this is the last trial of the current block (but not the last trial overall), pause and wait for spacebar
-    if pause_between_blocks && t < nTrials && (t == find(trialBlock == trialBlock(t), 1, 'last'))
+    if op.pause_between_blocks && t < nTrials && (t == find(trialBlock == trialBlock(t), 1, 'last'))
         set(hText, 'String', sprintf('Block %d/%d finished.\nPress spacebar to continue.', ...
             trialBlock(t), max(trialBlock)), 'FontSize', 28, 'Color', 'blue');
         drawnow;
@@ -256,11 +257,11 @@ if doSave
     td = trialDelays(1:completedTrials); % Final delays
     ic = isCatch(1:completedTrials); % Final catch mask
     tb = trialBlock(1:completedTrials); % Final block numbers
-    runMeta = struct('subject', subject, 'session', session, 'run', runNum, 'task', task, 'created_on', datestr(now), ...
-        'catchRatio', catchRatio, 'delayOptions', delayOptions, 'sentDur', sentenceDur, 'fixDur', fixDur, 'ITI', ITI, ...
-        'prepPause', prepPause, 'audioGain', audioGain, 'frameSize', frameSize, 'samplingRate', Fs, 'totalTrials', completedTrials, ...
+    metadata = struct('subject', subject, 'session', session, 'run', runNum, 'task', task, 'created_on', datestr(now), ...
+        'catchRatio', catchRatio, 'delayOptions', delayOptions, ...
+        'totalTrials', completedTrials, ...
         'nCatchTrials', sum(ic(:)), 'trialOrder', table(tb(:), ts(:), td(:), ic(:), 'VariableNames', {'trialBlock','trialSentIdx','trialDelays','isCatch'})); % Save all metadata for reproducibility
-    save(metaFileName, 'runMeta'); % Save metadata
+    save(metaFileName, 'metadata', 'op'); % Save metadata
     fprintf('Metadata saved to: %s\n', metaFileName); % Confirm
 else
     fprintf('Session was not saved.\n'); % Confirm
