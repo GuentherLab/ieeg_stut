@@ -56,7 +56,17 @@ else % analyzing on a local machine
             dirs.data = ['C:\ieeg_stut'];  % source data
 
         case {'sam_laptop'} % Sam Hansen laptop
-            dirs.projrepo = [pkgdir filesep 'ieeg_stut']; 
+            beep off
+            host = getenv('COMPUTERNAME');
+            warning('Unrecognized host: %s. Setting manual project directory.', host);
+            dirs.projrepo = 'C:\Users\samkh\OneDrive\Documents\MATLAB\ieeg_stut';
+            dirs.data     = dirs.projrepo;
+            dirs.spm      = fullfile(dirs.projrepo, 'spm12');
+            dirs.conn     = fullfile(dirs.projrepo, 'conn');
+            dirs.FLvoice  = fullfile(dirs.projrepo, 'FLvoice');
+            dirs.stim     = fullfile(dirs.projrepo, 'stimuli');
+            dirs.config   = fullfile(dirs.projrepo, 'config'); 
+            dirs.derivatives = fullfile(dirs.data, 'der');
             
         case {'677-GUE-WD-0013'} % Guenther Lab soundbooth computer
             dirs.projrepo = ['C:\ieeg_stut']; 

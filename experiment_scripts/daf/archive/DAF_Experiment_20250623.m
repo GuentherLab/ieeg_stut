@@ -23,8 +23,24 @@ ITI = 2.0; % Inter-trial interval (seconds)
 delayOptions = [0, 150, 200, 250]; % DAF delay conditions in ms
 catchRatio = 1/6; % Fraction of catch (no-speak) trials
 
-%%
-set_paths_ieeg_stut()
+%% Manual path setup (for unrecognized host)
+beep off
+host = getenv('COMPUTERNAME');
+warning('Unrecognized host: %s. Setting manual project directory.', host);
+dirs.projrepo = 'C:\Users\samkh\OneDrive\Documents\MATLAB\ieeg_stut';
+dirs.data     = dirs.projrepo;
+dirs.spm      = fullfile(dirs.projrepo, 'spm12');
+dirs.conn     = fullfile(dirs.projrepo, 'conn');
+dirs.FLvoice  = fullfile(dirs.projrepo, 'FLvoice');
+dirs.stim     = fullfile(dirs.projrepo, 'stimuli');
+dirs.config   = fullfile(dirs.projrepo, 'config'); 
+dirs.derivatives = fullfile(dirs.data, 'der');
+
+paths_to_add = {dirs.projrepo; dirs.derivatives; dirs.spm; ...
+    [dirs.projrepo filesep 'util']; ...
+    [dirs.projrepo filesep 'analysis']; ...
+    [dirs.projrepo filesep 'experiment_scripts']};
+addpath(paths_to_add{:});
 
 %% Subject/session/task input + BIDS folder setup
 if doSave % Only prompt if saving is enabled
