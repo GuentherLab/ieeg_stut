@@ -55,9 +55,16 @@ else % analyzing on a local machine
 
             dirs.data = ['C:\ieeg_stut'];  % source data
 
-        case {'sam_laptop'}
+        case {'sam_laptop'} % Sam Hansen laptop
             dirs.projrepo = [pkgdir filesep 'ieeg_stut']; 
-
+            
+        case {'677-GUE-WD-0013'} % Guenther Lab soundbooth computer
+            dirs.projrepo = ['C:\ieeg_stut']; 
+            dirs.spm = ['C:\speechres\spm12'];
+            dirs.conn = ['C:\speechres\conn'];
+            dirs.FLvoice  = ['C:\speechres\FLvoice'];
+            
+            dirs.data = ['C:\ieeg_stut_data'];  % source data
 
         otherwise
             
