@@ -3,6 +3,7 @@
 
 clear; % Clear all variables from workspace
 clc;   % Clear command window
+close all % close all figure windows
 AssertOpenGL; % Ensure Psychtoolbox is available
 
 %% Prompt for saving
@@ -12,18 +13,22 @@ doSave = strcmpi(saveData, 'y'); % Logical flag for saving
 
 %% Parameter settings
 Nblocks = 4; % Number of blocks
-pause_between_blocks = true; % Set to true to require keypress between blocks
+pause_between_blocks = 0; % Set to true to require keypress between blocks
 Fs = 44100; % Audio sample rate in Hz
 frameSize = 128; % Number of samples processed per audio frame
-audioGain = 2.5; % Output gain for delayed signal
-fixDur = 0.5; % Duration of fixation cue (seconds)
-prepPause = 0.5; % Pause between fixation and sentence onset (seconds)
-sentDur = 5.0; % Duration for which sentence is displayed and spoken (seconds)
+audioGain = 15; % Output gain for delayed signal... might want to run volume calibration for each subject
+fixDur = 0.; % Duration of fixation cue (seconds)
+prepPause = 0.; % Pause between fixation and sentence onset (seconds)
+sentenceDur = 20.0; % Duration for which sentence is displayed and spoken (seconds)
 ITI = 2.0; % Inter-trial interval (seconds)
-delayOptions = [0, 150, 200, 250]; % DAF delay conditions in ms
+font_size = 65; 
+maxCharPerLine = 38; % wrap text at this length
+
+% delayOptions = [0, 150, 200, 250]; % DAF delay conditions in ms
+delayOptions = [150]; % DAF delay conditions in ms
 
 catchRatio = 0; 
-catchRatio = 1/6; % Fraction of catch (no-speak) trials
+% catchRatio = 1/6; % Fraction of catch (no-speak) trials
 
 %%
 [dirs, host] = set_paths_ieeg_stut();
@@ -33,7 +38,7 @@ task = 'daf';
 if doSave % Only prompt if saving is enabled
     subject = input('Enter subject ID (e.g., pilot01): ', 's');
     session = input('Enter session ID (e.g., 1): ', 's');
-    dirs.sub = fullfile(dirs.data, 'sourcedata', ['sub-' subject]);
+    dirs.sub = fullfile(dirs.data, ['sub-' subject]);
     dirs.ses = fullfile(dirs.sub, ['ses-' session]);
     runNum = 1; % Start with run-01
     while true % Find next available run folder
@@ -109,7 +114,7 @@ screenSize = get(0, 'ScreenSize'); % Get screen size for centering
 fig = figure('Name','DAF','Color','white','MenuBar','none','ToolBar','none','Position',[screenSize(3)/4 screenSize(4)/4 900 600],'NumberTitle','off'); % Main experiment window
 ax = axes('Parent',fig,'Position',[0 0 1 1],'Visible','off'); % Invisible axes for center-center text
 hText = text(0.5, 0.5, '', ...
-    'FontSize', 28, ...
+    'FontSize', font_size, ...
     'FontWeight', 'bold', ...
     'HorizontalAlignment', 'center', ...
     'VerticalAlignment', 'middle', ...
@@ -122,14 +127,12 @@ uicontrol(stopFig,'Style','pushbutton','String','Stop','FontSize',14,'Position',
 %% Instructions and sync beeps
 instructions = [
     'INSTRUCTIONS\n\n' ...
-    'You will see a series of sentences.\n\n' ...
-    '* When you see a GRAY asterisk (*), read the sentence aloud.\n' ...
-    '* When you see a RED asterisk (*), do NOT speak.\n\n' ...
-    'Try to speak clearly and at a natural pace.\n\n' ...
+    'When text appears on the screen,\n'...
+    'Read as quickly and accurately as possible.\n\n' ...
     'Press any key to begin...'
 ];
 set(hText, 'String', sprintf(instructions), ...
-    'FontSize', 22, ...
+    'FontSize', 55, ...
     'Color', 'black'); % Show instructions
 figure(fig); % Bring main window to front
 set(fig, 'WindowKeyPressFcn', @(~,~) uiresume(fig)); % Resume on any key
@@ -163,13 +166,14 @@ for t = 1:nTrials
     if getappdata(0, 'stopReq'), break; % Stop if pressed
     end
     sIdx = trialSentIdx(t); delay_ms = trialDelays(t); delay_samples = Fs * delay_ms / 1000; % Trial parameters
-    sentence = sentences{sIdx}; isSpeak = ~isCatch(t); % Sentence text, trial type
+    text_stim = sentences{sIdx}; isSpeak = ~isCatch(t); % Sentence text, trial type
+    text_stim_wrapped = textwrap({text_stim},maxCharPerLine); 
     for i = 1:maxDelayFrames
         writer(zeros(frameSize,1)); % Flush output buffer
         vfd(zeros(frameSize,1), delay_samples); % Flush delay buffer
     end
     vfd.reset(); % Reset delay state
-    set(hText, 'String', '*', 'FontSize', 48, 'Color', ifelse(isSpeak, [0.7 0.7 0.7], 'red')); % Show asterisk cue
+    set(hText, 'String', '*', 'FontSize', font_size, 'Color', ifelse(isSpeak, [0.7 0.7 0.7], 'red')); % Show asterisk cue
     drawnow;
     fixOn = GetSecs - refTime; % Log fixation onset
     fixStart = GetSecs;
@@ -177,12 +181,12 @@ for t = 1:nTrials
     set(hText, 'String', '');
     drawnow; % Clear
     WaitSecs(prepPause); % Pre-sentence pause
-    set(hText, 'String', sentence, 'FontSize', 32, 'Color', 'black'); drawnow; % Show sentence
+    set(hText, 'String', text_stim_wrapped, 'FontSize', font_size, 'Color', 'black'); drawnow; % Show sentence
     visOn = GetSecs - refTime; % Log sentence onset
     if isSpeak && delay_ms > 0 % Only do DAF if not catch and delay > 0
         DAFstart = GetSecs;
         frameCounter = 0;
-        while (GetSecs - DAFstart) < sentDur && ~getappdata(0,'stopReq') % While within trial duration and not stopped
+        while (GetSecs - DAFstart) < sentenceDur && ~getappdata(0,'stopReq') % While within trial duration and not stopped
             tStart = GetSecs; % Start timing for this frame
             audioIn = reader(); delayed = vfd(audioIn, delay_samples); % Get input, apply delay
             audioOut = max(min(audioGain * delayed, 1), -1); % Apply gain, clip to [-1,1]
@@ -205,7 +209,7 @@ for t = 1:nTrials
         WaitSecs(0.1); % Short pause to finish playback
     else
         sentStart = GetSecs;
-        while (GetSecs - sentStart) < sentDur; end % Wait for sentence duration if not DAF
+        while (GetSecs - sentStart) < sentenceDur; end % Wait for sentence duration if not DAF
     end
     visOff = GetSecs - refTime; % Log sentence offset
     set(hText, 'String', '');
@@ -215,12 +219,12 @@ for t = 1:nTrials
 
     % Console log
     fprintf('Block: %d | Delay: %3d ms | %s | Sentence: %s | Visual On: %.3f s\n', ...
-        trialBlock(t), delay_ms, ifelse(isSpeak,'Speaking','Catch'), sentence, visOn);
+        trialBlock(t), delay_ms, ifelse(isSpeak,'Speaking','Catch'), text_stim, visOn);
 
     % Log file output (block, timings, type, sentence, delay)
     if doSave && ~isempty(logFile)
         fprintf(logFile, '%d\t%.3f\t%.3f\t%.3f\t%s\t%s\t%d\n', ...
-            trialBlock(t), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), sentence, delay_ms);
+            trialBlock(t), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), text_stim, delay_ms);
     end
 
     %  Pause between blocks: if this is the last trial of the current block (but not the last trial overall), pause and wait for spacebar
@@ -253,7 +257,7 @@ if doSave
     ic = isCatch(1:completedTrials); % Final catch mask
     tb = trialBlock(1:completedTrials); % Final block numbers
     runMeta = struct('subject', subject, 'session', session, 'run', runNum, 'task', task, 'created_on', datestr(now), ...
-        'catchRatio', catchRatio, 'delayOptions', delayOptions, 'sentDur', sentDur, 'fixDur', fixDur, 'ITI', ITI, ...
+        'catchRatio', catchRatio, 'delayOptions', delayOptions, 'sentDur', sentenceDur, 'fixDur', fixDur, 'ITI', ITI, ...
         'prepPause', prepPause, 'audioGain', audioGain, 'frameSize', frameSize, 'samplingRate', Fs, 'totalTrials', completedTrials, ...
         'nCatchTrials', sum(ic(:)), 'trialOrder', table(tb(:), ts(:), td(:), ic(:), 'VariableNames', {'trialBlock','trialSentIdx','trialDelays','isCatch'})); % Save all metadata for reproducibility
     save(metaFileName, 'runMeta'); % Save metadata
