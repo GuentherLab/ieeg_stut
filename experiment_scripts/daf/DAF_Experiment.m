@@ -15,41 +15,44 @@ Nblocks = 4; % Number of blocks
 pause_between_blocks = true; % Set to true to require keypress between blocks
 Fs = 44100; % Audio sample rate in Hz
 frameSize = 128; % Number of samples processed per audio frame
-audioGain = 2.0; % Output gain for delayed signal
-fixDur = 1.0; % Duration of fixation cue (seconds)
+audioGain = 2.5; % Output gain for delayed signal
+fixDur = 0.5; % Duration of fixation cue (seconds)
 prepPause = 0.5; % Pause between fixation and sentence onset (seconds)
 sentDur = 5.0; % Duration for which sentence is displayed and spoken (seconds)
 ITI = 2.0; % Inter-trial interval (seconds)
 delayOptions = [0, 150, 200, 250]; % DAF delay conditions in ms
+
+catchRatio = 0; 
 catchRatio = 1/6; % Fraction of catch (no-speak) trials
 
 %%
-set_paths_ieeg_stut()
+[dirs, host] = set_paths_ieeg_stut();
 
 %% Subject/session/task input + BIDS folder setup
+task = 'daf'; 
 if doSave % Only prompt if saving is enabled
     subject = input('Enter subject ID (e.g., pilot01): ', 's');
     session = input('Enter session ID (e.g., 1): ', 's');
-    task = input('Enter task label (e.g., daf): ', 's');
     dirs.sub = fullfile(dirs.data, 'sourcedata', ['sub-' subject]);
     dirs.ses = fullfile(dirs.sub, ['ses-' session]);
     runNum = 1; % Start with run-01
     while true % Find next available run folder
         runLabel = sprintf('run-%02d', runNum);
-        dirs.run = fullfile(dirs.ses, runLabel);
+        dirs.run = fullfile(dirs.ses, task, runLabel);
         if ~exist(dirs.run, 'dir') % If folder doesn't exist, use it
             mkdir(dirs.run);
             break;
         end
         runNum = runNum + 1; % Otherwise increment run number
     end
-    baseName = sprintf('sub-%s_ses-%s_run-%02d_task-%s', subject, session, runNum, task);
+    baseName = sprintf('sub-%s_ses-%s_task-%s_run-%02d', subject, session, task, runNum);
     logFileName = fullfile(dirs.run, [baseName '_trials-words.tsv']);
     metaFileName = fullfile(dirs.run, [baseName '_desc-meta.mat']);
 end
 
 %% Load sentences and block randomization (with preallocation)
-T = readtable('sentences.tsv', 'FileType','text', 'Delimiter','\t', 'ReadVariableNames',false);
+T = readtable([dirs.projrepo, filesep, 'stimuli', filesep, 'daf_sentences.tsv'],...
+     'FileType','text', 'Delimiter','\t', 'ReadVariableNames',false);
 sentences = T.Var1; % Extract sentences as cell array
 nSentences = numel(sentences); % Number of sentences
 
@@ -82,14 +85,20 @@ if nCatch > 0
 end
 
 %% Audio setup
-devices = getAudioDevices(audioDeviceReader); % List available audio devices
-for k = 1:length(devices)
-    fprintf('%d: %s\n', k, devices{k});
+input_devices = getAudioDevices(audioDeviceReader); % List available audio input devices
+for k = 1:length(input_devices)
+    fprintf('%d: %s\n', k, input_devices{k});
 end
 inIdx = input('INPUT device #: '); % User selects input device
+reader = audioDeviceReader('SampleRate', Fs, 'SamplesPerFrame', frameSize, 'Device', input_devices{inIdx}); % Live mic input
+
+output_devices = getAudioDevices(audioDeviceWriter); % List available audio output devices
+for k = 1:length(input_devices)
+    fprintf('%d: %s\n', k, input_devices{k});
+end
 outIdx = input('OUTPUT device #: '); % User selects output device
-reader = audioDeviceReader('SampleRate', Fs, 'SamplesPerFrame', frameSize, 'Device', devices{inIdx}); % Live mic input
-writer = audioDeviceWriter('SampleRate', Fs, 'Device', devices{outIdx}); % Speaker output
+
+writer = audioDeviceWriter('SampleRate', Fs, 'Device', output_devices{outIdx}); % Speaker output
 vfd = dsp.VariableFractionalDelay('MaximumDelay', round(Fs * 0.5)); % Delay buffer for DAF
 for k = 1:10, writer(reader()); end % Prime audio pipeline (avoid startup glitch)
 maxDelay_ms = max(delayOptions); % Find largest delay (ms)
