@@ -1,10 +1,6 @@
 % Delayed Auditory Feedback (DAF) Experiment
 % Requires Audio Toolbox and Psychtoolbox
 
-%% MAKE SURE AUDAPTER IS NOT RUNNING, or else it might play back speech at 0 delay on all trials
-%   ... to be safe, restart Matlab before running this script
-%%
-
 clear; % Clear all variables from workspace
 clc;   % Clear command window
 close all % close all figure windows
@@ -28,8 +24,12 @@ op.iti = 2.0; % Inter-trial interval (seconds)
 op.stim_font_size = 65; 
 op.stim_max_char_per_line = 38; % wrap text at this length
 
-% delayOptions = [0, 150, 200, 250]; % DAF delay condop.itions in ms
-delayOptions = [0 150]; % DAF delay conditions in ms
+% delayOptions = [0, 150, 200, 250]; % DAF delay condoitions in ms
+delayOptions = [0 150]; % DAF delay conditions in ms (MAX IS 1000ms)
+maxAllowedDelay_ms = 1000;
+if any(delayOptions > maxAllowedDelay_ms)
+    error('One or more delayOptions exceed the maximum allowed delay of %d ms.', maxAllowedDelay_ms);
+end
 
 catchRatio = 0; 
 % catchRatio = 1/6; % Fraction of catch (no-speak) trials
@@ -102,13 +102,13 @@ inIdx = input('INPUT device #: '); % User selects input device
 reader = audioDeviceReader('SampleRate', op.audio_sample_rate, 'SamplesPerFrame', op.audio_frame_size, 'Device', input_devices{inIdx}); % Live mic input
 
 output_devices = getAudioDevices(audioDeviceWriter); % List available audio output devices
-for k = 1:length(input_devices)
-    fprintf('%d: %s\n', k, input_devices{k});
+for k = 1:length(output_devices)
+    fprintf('%d: %s\n', k, output_devices{k});
 end
 outIdx = input('OUTPUT device #: '); % User selects output device
 
 writer = audioDeviceWriter('SampleRate', op.audio_sample_rate, 'Device', output_devices{outIdx}); % Speaker output
-vfd = dsp.VariableFractionalDelay('MaximumDelay', round(op.audio_sample_rate * 0.5)); % Delay buffer for DAF
+vfd = dsp.VariableFractionalDelay('MaximumDelay', round(op.audio_sample_rate)); % Delay buffer for DAF
 for k = 1:10, writer(reader()); end % Prime audio pipeline (avoid startup glitch)
 maxDelay_ms = max(delayOptions); % Find largest delay (ms)
 maxDelayFrames = ceil((maxDelay_ms/1000) * op.audio_sample_rate / op.audio_frame_size) + 5; % Max delay in frames, add buffer
@@ -159,7 +159,7 @@ set(hText, 'String', ''); drawnow; % Clear after last beep
 if doSave
     logFile = fopen(logFileName, 'w'); % Open trial log
     fprintf(logFile, 'SYNC_TIME\t%s\n', char(syncTime)); % Write sync time
-    fprintf(logFile, 'block\tfixation_onset\tsentence_onset\tsentence_ofop.audio_sample_rateet\ttrial_type\tsentence\tdelay_ms\n'); % Updated header
+    fprintf(logFile, 'trialnum\tblock\tfixation_onset\tsentence_onset\tsentence_offset\ttrial_type\tsentence\tdelay_ms\n'); % Updated header
     save(metaFileName,'op'); % Save metadata
 else
     logFile = [];
@@ -228,8 +228,8 @@ for t = 1:nTrials
 
     % Log file output (block, timings, type, sentence, delay)
     if doSave && ~isempty(logFile)
-        fprintf(logFile, '%d\t%.3f\t%.3f\t%.3f\t%s\t%s\t%d\n', ...
-            trialBlock(t), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), text_stim, delay_ms);
+        fprintf(logFile, '%d\t%d\t%.3f\t%.3f\t%.3f\t%s\t%s\t%d\n', t, trialBlock(t), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), sentence, delay_ms);
+
     end
 
     %  Pause between blocks: if this is the last trial of the current block (but not the last trial overall), pause and wait for spacebar
