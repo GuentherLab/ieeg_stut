@@ -1,6 +1,10 @@
 % Delayed Auditory Feedback (DAF) Experiment
 % Requires Audio Toolbox and Psychtoolbox
 
+%% MAKE SURE AUDAPTER IS NOT RUNNING, or else it might play back speech at 0 delay on all trials
+%   ... to be safe, restart Matlab before running this script
+%%
+
 clear; % Clear all variables from workspace
 clc;   % Clear command window
 close all % close all figure windows
@@ -12,20 +16,20 @@ saveData='y'; % set for autosave
 doSave = strcmpi(saveData, 'y'); % Logical flag for saving
 
 %% Parameter settings
-op.n_blocks = 4; % Number of blocks
+op.n_blocks = 3; % Number of blocks
 op.pause_between_blocks = 0; % Set to true to require keypress between blocks
 op.audio_sample_rate = 44100; % Audio sample rate in Hz
 op.audio_frame_size = 128; % Number of samples processed per audio frame
 op.audio_playback_gain = 15; % Output gain for delayed signal... might want to run volume calibration for each subject
 op.fix_cross_dur = 0.; % Duration of fixation cue (seconds)
 op.delay_dur = 0.; % Pause between fixation and sentence onset (seconds)
-op.text_stim_dur = 20.0; % Duration for which sentence is displayed and spoken (seconds)
+op.text_stim_dur = 12.0; % Duration for which sentence is displayed and spoken (seconds)
 op.iti = 2.0; % Inter-trial interval (seconds)
 op.stim_font_size = 65; 
 op.stim_max_char_per_line = 38; % wrap text at this length
 
 % delayOptions = [0, 150, 200, 250]; % DAF delay condop.itions in ms
-delayOptions = [10150]; % DAF delay conditions in ms
+delayOptions = [0 150]; % DAF delay conditions in ms
 
 catchRatio = 0; 
 % catchRatio = 1/6; % Fraction of catch (no-speak) trials
