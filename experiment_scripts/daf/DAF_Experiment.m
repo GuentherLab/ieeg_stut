@@ -25,7 +25,7 @@ op.stim_font_size = 65;
 op.stim_max_char_per_line = 38; % wrap text at this length
 
 % delayOptions = [0, 150, 200, 250]; % DAF delay condop.itions in ms
-delayOptions = [150]; % DAF delay condop.itions in ms
+delayOptions = [10150]; % DAF delay conditions in ms
 
 catchRatio = 0; 
 % catchRatio = 1/6; % Fraction of catch (no-speak) trials
