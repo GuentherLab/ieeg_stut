@@ -25,7 +25,7 @@ op.stim_font_size = 65;
 op.stim_max_char_per_line = 38; % wrap text at this length
 
 % delayOptions = [0, 150, 200, 250]; % DAF delay condoitions in ms
-delayOptions = [0 150]; % DAF delay conditions in ms (MAX IS 1000ms)
+delayOptions = [150]; % DAF delay conditions in ms (MAX IS 1000ms)
 maxAllowedDelay_ms = 1000;
 if any(delayOptions > maxAllowedDelay_ms)
     error('One or more delayOptions exceed the maximum allowed delay of %d ms.', maxAllowedDelay_ms);
@@ -228,7 +228,7 @@ for t = 1:nTrials
 
     % Log file output (block, timings, type, sentence, delay)
     if doSave && ~isempty(logFile)
-        fprintf(logFile, '%d\t%d\t%.3f\t%.3f\t%.3f\t%s\t%s\t%d\n', t, trialBlock(t), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), sentence, delay_ms);
+        fprintf(logFile, '%d\t%d\t%.3f\t%.3f\t%.3f\t%s\t%s\t%d\n', t, trialBlock(t), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), text_stim, delay_ms);
 
     end
 
