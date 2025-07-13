@@ -55,9 +55,26 @@ else % analyzing on a local machine
 
             dirs.data = ['C:\ieeg_stut'];  % source data
 
-        case {'sam_laptop'}
-            dirs.projrepo = [pkgdir filesep 'ieeg_stut']; 
-
+        case {'sam_laptop'} % Sam Hansen laptop
+            beep off
+            host = getenv('COMPUTERNAME');
+            warning('Unrecognized host: %s. Setting manual project directory.', host);
+            dirs.projrepo = 'C:\Users\samkh\OneDrive\Documents\MATLAB\ieeg_stut';
+            dirs.data     = dirs.projrepo;
+            dirs.spm      = fullfile(dirs.projrepo, 'spm12');
+            dirs.conn     = fullfile(dirs.projrepo, 'conn');
+            dirs.FLvoice  = fullfile(dirs.projrepo, 'FLvoice');
+            dirs.stim     = fullfile(dirs.projrepo, 'stimuli');
+            dirs.config   = fullfile(dirs.projrepo, 'config'); 
+            dirs.derivatives = fullfile(dirs.data, 'der');
+            
+        case {'677-GUE-WD-0013'} % Guenther Lab soundbooth computer
+            dirs.projrepo = ['C:\ieeg_stut']; 
+            dirs.spm = ['C:\speechres\spm12'];
+            dirs.conn = ['C:\speechres\conn'];
+            dirs.FLvoice  = ['C:\speechres\FLvoice'];
+            
+            dirs.data = ['C:\ieeg_stut_data'];  % source data
 
         otherwise
             
@@ -89,6 +106,7 @@ paths_to_add = {dirs.projrepo;...
                 [dirs.projrepo filesep 'util'];...
                 [dirs.projrepo filesep 'analysis'];...
                 [dirs.projrepo filesep 'experiment_scripts'];...
+                [dirs.projrepo filesep 'experiment_scripts' filesep 'auddev'];...
                 };
 genpaths_to_add = {  %%%% add these dirs and all recursive subdirs
                     };
