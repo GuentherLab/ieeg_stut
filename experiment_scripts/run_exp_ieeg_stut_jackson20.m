@@ -44,7 +44,7 @@ beepoffset = 0.100;
 %%% if op.preview_answer  _to_subject is true, orthography of the expected answer will be shown to the subject before investigator asks question
 % op.preview_answer_to_subject = 0; % use for in-person jackson20 task
 op.preview_answer_to_subject = 1; % use for remote session Answer-Question task
-    op.preview_answer_duration = 4; % duration of preview in sec
+    op.preview_answer_duration = 3; % duration of preview in sec
  
 % wait period between experimenter finishing question and playing of the GO beep and green screen
 % op.anticipation_dur_sec = 4; % use for in-person jackson20 task
