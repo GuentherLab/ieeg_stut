@@ -12,7 +12,7 @@ saveData='y'; % set for autosave
 doSave = strcmpi(saveData, 'y'); % Logical flag for saving
 
 %% Parameter settings
-op.n_blocks = 3; % Number of blocks
+op.n_blocks = 1; % Number of blocks
 op.pause_between_blocks = 0; % Set to true to require keypress between blocks
 op.audio_sample_rate = 44100; % Audio sample rate in Hz
 op.audio_frame_size = 128; % Number of samples processed per audio frame
@@ -24,8 +24,8 @@ op.iti = 2.0; % Inter-trial interval (seconds)
 op.stim_font_size = 65; 
 op.stim_max_char_per_line = 38; % wrap text at this length
 
-% delayOptions = [0, 150, 200, 250]; % DAF delay condoitions in ms
-delayOptions = [150]; % DAF delay conditions in ms (MAX IS 1000ms)
+delayOptions = [0, 100, 150, 200]; % DAF delay condoitions in ms
+% delayOptions = [150]; % DAF delay conditions in ms (MAX IS 1000ms)
 maxAllowedDelay_ms = 1000;
 if any(delayOptions > maxAllowedDelay_ms)
     error('One or more delayOptions exceed the maximum allowed delay of %d ms.', maxAllowedDelay_ms);
