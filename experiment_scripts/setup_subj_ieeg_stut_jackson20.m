@@ -5,17 +5,17 @@ function setup_subj_ieeg_stut_jackson20(subjID)
 %%%% you must already have a list of anticipated/unanticipated words 
 %%%% ... format into tsv with 'anticipated' column (logical) and 'word' column (text)
 %
-% to generated a dummy list, can use the following ChatGPT prompt:.....
+% to generate a dummy list, can use the following ChatGPT prompt:.....
 %    ..."generate a list of 10 words that are likely to elicit stuttering and a list of 10 words that are not likely to elicit stuttering" 
 
-op.ses = 1; 
+op.ses = 2; 
 op.run = 1; % need to add overwrite protection/checking
 
-% op.repetitions_per_word = 3; 
-op.repetitions_per_word = 1; % use for remote session
+op.repetitions_per_word = 4; 
+% op.repetitions_per_word = 1; % use for remote session
 
-% op.shuffle_list = 1;
-op.shuffle_list = 0;
+op.shuffle_list = 1;
+% op.shuffle_list = 0;
 
 op.num_run_digits = 2; % number of digits to include in run number labels in filenames
 

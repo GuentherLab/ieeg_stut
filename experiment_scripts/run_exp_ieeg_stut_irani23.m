@@ -70,11 +70,11 @@ vardefault('op',struct);
 % field_default('op','ses',1); 
 
 % op.sub = 'qqq'; 
-% op.sub = 'pilot009'; 
+op.sub = 'pilot010'; 
 % op.sub = 'DM1049';
-op.sub = 'sap006'; 
+% op.sub = 'sap006'; 
 
-op.ses = 1; 
+op.ses = 2; 
 
 op.show_mic_trace_figure = 0; % if false, make mic trace figure invisible
         
