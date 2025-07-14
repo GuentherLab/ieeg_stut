@@ -69,10 +69,10 @@ vardefault('op',struct);
 % field_default('op','sub','qqq');
 % field_default('op','ses',1); 
 
-op.sub = 'qqq'; 
+% op.sub = 'qqq'; 
 % op.sub = 'pilot009'; 
 % op.sub = 'DM1049';
-% op.sub = 'sap022'; 
+op.sub = 'sap006'; 
 
 op.ses = 1; 
 

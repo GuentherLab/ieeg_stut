@@ -48,7 +48,7 @@ op.preview_answer_to_subject = 1; % use for remote session Answer-Question task
  
 % wait period between experimenter finishing question and playing of the GO beep and green screen
 % op.anticipation_dur_sec = 4; % use for in-person jackson20 task
-op.anticipation_dur_sec = 1; % use for remote session Answer-Question task
+op.anticipation_dur_sec = 2; % use for remote session Answer-Question task
 % op.anticipation_dur_sec = 0.0; % use for rtMRI piloting version
 
 show_mic_trace_figure = 0; % if false, make mic trace figure invisible

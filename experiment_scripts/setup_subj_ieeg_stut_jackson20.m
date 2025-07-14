@@ -11,7 +11,7 @@ function setup_subj_ieeg_stut_jackson20(subjID)
 op.ses = 1; 
 op.run = 1; % need to add overwrite protection/checking
 
-% op.repetitions_per_word = 2; 
+% op.repetitions_per_word = 3; 
 op.repetitions_per_word = 1; % use for remote session
 
 % op.shuffle_list = 1;
