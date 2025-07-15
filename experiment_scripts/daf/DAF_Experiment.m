@@ -47,7 +47,7 @@ if doSave % Only prompt if saving is enabled
     runNum = 1; % Start with run-01
     while true % Find next available run folder
         runLabel = sprintf('run-%02d', runNum);
-        dirs.run = fullfile(dirs.ses, task, runLabel);
+        dirs.run = fullfile(dirs.ses, 'beh', task, runLabel);
         if ~exist(dirs.run, 'dir') % If folder doesn't exist, use it
             mkdir(dirs.run);
             break;
