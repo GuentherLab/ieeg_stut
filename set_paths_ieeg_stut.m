@@ -52,8 +52,13 @@ else % analyzing on a local machine
             dirs.spm = [pkgdir filesep 'spm12'];
             dirs.conn = [pkgdir filesep 'conn'];
             dirs.FLvoice  = [pkgdir filesep 'FLvoice'];
-
             dirs.data = ['C:\ieeg_stut'];  % source data
+
+        case {'BML-ALIENWARE2'}
+            dirs.projrepo = 'D:\Task\ieeg_stut';
+            dirs.spm = 'C:\Users\abush\Documents\GitHub\spm12';
+            dirs.psychtoolbox = 'C:\Toolboxes\Psychtoolbox'; % for reference, don't need to add path
+            dirs.data = 'C:\ieeg_stut'; 
 
         case {'sam_laptop'} % Sam Hansen laptop
             beep off

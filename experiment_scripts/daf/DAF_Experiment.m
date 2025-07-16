@@ -24,8 +24,8 @@ op.iti = 2.0; % Inter-trial interval (seconds)
 op.stim_font_size = 65; 
 op.stim_max_char_per_line = 38; % wrap text at this length
 
-delayOptions = [0, 100, 150, 200]; % DAF delay condoitions in ms
-% delayOptions = [150]; % DAF delay conditions in ms (MAX IS 1000ms)
+% delayOptions = [0, 100, 150, 200]; % DAF delay condoitions in ms
+delayOptions = [150]; % DAF delay conditions in ms (MAX IS 1000ms)
 maxAllowedDelay_ms = 1000;
 if any(delayOptions > maxAllowedDelay_ms)
     error('One or more delayOptions exceed the maximum allowed delay of %d ms.', maxAllowedDelay_ms);
@@ -94,12 +94,24 @@ if nCatch > 0
 end
 
 %% Audio setup
+
 input_devices = getAudioDevices(audioDeviceReader); % List available audio input devices
 for k = 1:length(input_devices)
     fprintf('%d: %s\n', k, input_devices{k});
 end
 inIdx = input('INPUT device #: '); % User selects input device
-reader = audioDeviceReader('SampleRate', op.audio_sample_rate, 'SamplesPerFrame', op.audio_frame_size, 'Device', input_devices{inIdx}); % Live mic input
+
+% if using focisrite on BML intraop rig, specify the correct audio driver
+if strcmp(host,'BML-ALIENWARE2') && contains(input_devices{3},'Focusrite')
+    reader = audioDeviceReader('SampleRate', op.audio_sample_rate, ...
+        'SamplesPerFrame', op.audio_frame_size, ...
+        'Device', 'Focusrite USB ASIO',...
+        'Driver','ASIO'); % Live mic input  
+else
+    reader = audioDeviceReader('SampleRate', op.audio_sample_rate,...
+        'SamplesPerFrame', op.audio_frame_size,...
+        'Device', input_devices{inIdx}); % Live mic input
+end
 
 output_devices = getAudioDevices(audioDeviceWriter); % List available audio output devices
 for k = 1:length(output_devices)
@@ -193,7 +205,8 @@ for t = 1:nTrials
         frameCounter = 0;
         while (GetSecs - DAop.audio_sample_ratetart) < op.text_stim_dur && ~getappdata(0,'stopReq') % While within trial duration and not stopped
             tStart = GetSecs; % Start timing for this frame
-            audioIn = reader(); delayed = vfd(audioIn, delay_samples); % Get input, apply delay
+            audioIn = reader(); 
+            delayed = vfd(audioIn, delay_samples); % Get input, apply delay
             audioOut = max(min(op.audio_playback_gain * delayed, 1), -1); % Apply gain, clip to [-1,1]
             writer(audioOut); % Output delayed audio
             lag = max((GetSecs - tStart)*1000 - (op.audio_frame_size/op.audio_sample_rate*1000), 0); % Compute audio processing lag in ms
