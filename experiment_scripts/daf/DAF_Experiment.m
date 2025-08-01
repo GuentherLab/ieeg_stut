@@ -24,8 +24,8 @@ op.iti = 2.0; % Inter-trial interval (seconds)
 op.stim_font_size = 65; 
 op.stim_max_char_per_line = 38; % wrap text at this length
 
-% delayOptions = [0, 100, 150, 200]; % DAF delay condoitions in ms
-delayOptions = [150]; % DAF delay conditions in ms (MAX IS 1000ms)
+delayOptions = [0, 100, 150, 200]; % DAF delay condoitions in ms
+% delayOptions = [150]; % DAF delay conditions in ms (MAX IS 1000ms)
 maxAllowedDelay_ms = 1000;
 if any(delayOptions > maxAllowedDelay_ms)
     error('One or more delayOptions exceed the maximum allowed delay of %d ms.', maxAllowedDelay_ms);
@@ -179,12 +179,14 @@ end
 
 %% Trial loop
 lagBuffer = zeros(1, 5000); lagIndex = 1; lagCount = 0; completedTrials = 0; % Buffers for audio latency diagnostics
-for t = 1:nTrials
+for itrial = 1:nTrials
     if getappdata(0, 'stopReq'), break; % Stop if pressed
     end
-    sIdx = trialSentIdx(t); delay_ms = trialDelays(t); delay_samples = op.audio_sample_rate * delay_ms / 1000; % Trial parameters
-    text_stim = sentences{sIdx}; isSpeak = ~isCatch(t); % Sentence text, trial type
+  
+    sIdx = trialSentIdx(itrial); delay_ms = trialDelays(itrial); delay_samples = op.audio_sample_rate * delay_ms / 1000; % Trial parameters
+    text_stim = sentences{sIdx}; isSpeak = ~isCatch(itrial); % Sentence text, trial type
     text_stim_wrapped = textwrap({text_stim},op.stim_max_char_per_line); 
+    
     for i = 1:maxDelayFrames
         writer(zeros(op.audio_frame_size,1)); % Flush output buffer
         vfd(zeros(op.audio_frame_size,1), delay_samples); % Flush delay buffer
@@ -200,6 +202,11 @@ for t = 1:nTrials
     WaitSecs(op.delay_dur); % Pre-sentence pause
     set(hText, 'String', text_stim_wrapped, 'FontSize', op.stim_font_size, 'Color', 'black'); drawnow; % Show sentence
     visOn = GetSecs - refTime; % Log sentence onset
+    
+         % Commandline output
+    fprintf('Trial %d/%d | Block: %d | Delay: %3d ms | %s | Sentence: %s | Visual On: %.3f s\n', ...
+    itrial, nTrials, trialBlock(itrial), delay_ms, ifelse(isSpeak,'Speaking','Catch'), text_stim, visOn);
+    
     if isSpeak && delay_ms > 0 % Only do DAF if not catch and delay > 0
         DAop.audio_sample_ratetart = GetSecs;
         frameCounter = 0;
@@ -235,22 +242,18 @@ for t = 1:nTrials
     op.itistart = GetSecs;
     while (GetSecs - op.itistart) < op.iti; end % Inter-trial interval
 
-    % Console log
-    fprintf('Block: %d | Delay: %3d ms | %s | Sentence: %s | Visual On: %.3f s\n', ...
-        trialBlock(t), delay_ms, ifelse(isSpeak,'Speaking','Catch'), text_stim, visOn);
-
     % Log file output (block, timings, type, sentence, delay)
     if doSave && ~isempty(logFile)
-        fprintf(logFile, '%d\t%d\t%.3f\t%.3f\t%.3f\t%s\t%s\t%d\n', t, trialBlock(t), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), text_stim, delay_ms);
+        fprintf(logFile, '%d\t%d\t%.3f\t%.3f\t%.3f\t%s\t%s\t%d\n', itrial, trialBlock(itrial), fixOn, visOn, visOff, ifelse(isSpeak,'speech','catch'), text_stim, delay_ms);
 
     end
 
     %  Pause between blocks: if this is the last trial of the current block (but not the last trial overall), pause and wait for spacebar
-    if op.pause_between_blocks && t < nTrials && (t == find(trialBlock == trialBlock(t), 1, 'last'))
+    if op.pause_between_blocks && itrial < nTrials && (itrial == find(trialBlock == trialBlock(itrial), 1, 'last'))
         set(hText, 'String', sprintf('Block %d/%d finished.\nPress spacebar to continue.', ...
-            trialBlock(t), max(trialBlock)), 'FontSize', 28, 'Color', 'blue');
+            trialBlock(itrial), max(trialBlock)), 'FontSize', 28, 'Color', 'blue');
         drawnow;
-        fprintf('Block %d/%d finished; press spacebar to continue...\n', trialBlock(t), max(trialBlock));
+        fprintf('Block %d/%d finished; press spacebar to continue...\n', trialBlock(itrial), max(trialBlock));
         set(fig, 'WindowKeyPressFcn', @(src,evt) spacebarToContinue(src,evt,fig)); % Use nested function below
         uiwait(fig); % Wait for spacebar
         set(fig, 'WindowKeyPressFcn', '');
