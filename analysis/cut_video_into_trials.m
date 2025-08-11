@@ -2,6 +2,8 @@
  % written for windows; ffmpeg path must be on the system path - see https://archive.ph/AQE03
 %
 % before running this script, first run make_blank_annot_tables.m to create landmarks table, then fill out that table
+% ..... for visual landmarks, may want to use video editor like OpenShot; use arrow keys to advance one frame at a time
+% ..... for audio landmarks, enable 'waveform' property in openshot for the track, or use audacity with codecs
 
  clear
 
