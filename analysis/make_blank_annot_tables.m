@@ -8,12 +8,6 @@
 %`  ..... following jackson ea 2020 - doi 10.1044/2019_JSLHR-S-19-0173
 
 
-
-% % % % % % % [[[[[ add section for creating blank landmarks file.... prefill with string "fill in X" here and numbers w/ inf]]]
-
-
-
-
  clear
 
 [dirs, host] = set_paths_ieeg_stut(); 
@@ -67,8 +61,14 @@ for irun = 1:nrunrows
     elseif ~exist(beh_scoring_filepath)
         switch task
             case 'jackson20'
-                trial_table_tsv = [dirs.src_task, filesep, file_prepend,'trials-words.tsv']; 
-                trials = readtable(trial_table_tsv,'FileType','text'); 
+                trial_table_tsv = [dirs.src_task, filesep, file_prepend,'trials.tsv']; % has stim plus timing data
+                trial_table_words_tsv = [dirs.src_task, filesep, file_prepend,'trials-words.tsv']; % only contains stim
+                if exist(trial_table_tsv,'file') % if there's trial tables file with more data, use that
+                    trials = readtable(trial_table_tsv,'FileType','text'); 
+                else
+                    trials = readtable(trial_table_words_tsv,'FileType','text'); 
+                end
+
             case 'irani23'
                 load([dirs.src_task, filesep, file_prepend,'trials.mat'], 'trials')
             otherwise
@@ -85,7 +85,13 @@ for irun = 1:nrunrows
         switch task
             case 'jackson20'
                 trials.stuttered = nancol;
-                firstvars = {'question','word','stuttered'}; 
+                if any(contains(trials.Properties.VariableNames,'word'))
+                    firstvars = {'question','word','stuttered'}; 
+                elseif any(contains(trials.Properties.VariableNames,'answer'))
+                    firstvars = {'question','answer','stuttered'}; 
+                else
+                    firstvars = {'question','stuttered'}; 
+                end
             case 'irani23'
                 trials.stuttered_1 = nancol;
                 trials.stuttered_2 = nancol;
