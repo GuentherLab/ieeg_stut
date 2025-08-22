@@ -55,7 +55,7 @@ if doSave % Only prompt if saving is enabled
         runNum = runNum + 1; % Otherwise increment run number
     end
     baseName = sprintf('sub-%s_ses-%s_task-%s_run-%02d', subject, session, task, runNum);
-    logFileName = fullfile(dirs.run, [baseName '_trials.tsv']);
+    logFileName = fullfile(dirs.run, [baseName '_trials-words.tsv']);
     metaFileName = fullfile(dirs.run, [baseName '_desc-meta.mat']);
 end
 
@@ -170,7 +170,7 @@ set(hText, 'String', ''); drawnow; % Clear after last beep
 %% Log file
 if doSave
     logFile = fopen(logFileName, 'w'); % Open trial log
-    metadata = struct; metadata.sync_time = syncTime; 
+    fprintf(logFile, 'SYNC_TIME\t%s\n', char(syncTime)); % Write sync time
     fprintf(logFile, 'trialnum\tblock\tfixation_onset\tsentence_onset\tsentence_offset\ttrial_type\tsentence\tdelay_ms\n'); % Updated header
     save(metaFileName,'op'); % Save metadata
 else
