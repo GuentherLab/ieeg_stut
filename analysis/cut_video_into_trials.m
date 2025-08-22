@@ -52,8 +52,13 @@ for irun = 1:nrunrows
     
     switch task
         case 'jackson20'
-            trial_table_tsv = [dirs.src_task, filesep, file_prepend,'trials-words.tsv']; 
-            trials = readtable(trial_table_tsv,'FileType','text'); 
+            trial_table_tsv = [dirs.src_task, filesep, file_prepend,'trials.tsv']; % has stim plus timing data
+            trial_table_words_tsv = [dirs.src_task, filesep, file_prepend,'trials-words.tsv']; % only contains stim
+            if exist(trial_table_tsv,'file') % if there's trial tables file with more data, use that
+                trials = readtable(trial_table_tsv,'FileType','text'); 
+            else
+                trials = readtable(trial_table_words_tsv,'FileType','text'); 
+            end
         case 'irani23'
             load([dirs.src_task, filesep, file_prepend,'trials.mat'], 'trials')
         otherwise
