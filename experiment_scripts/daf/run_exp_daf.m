@@ -44,19 +44,27 @@ if doSave % Only prompt if saving is enabled
     session = input('Enter session ID (e.g., 1): ', 's');
     dirs.sub = fullfile(dirs.data, ['sub-' subject]);
     dirs.ses = fullfile(dirs.sub, ['ses-' session]);
+    dirs.beh = [dirs.ses, filesep, 'beh'];
+
+    %    make sub ses dir
+    if ~exist(dirs.beh, 'file')
+        mkdir(dirs.beh)
+    end
+
+    % find next run number
     runNum = 1; % Start with run-01
     while true % Find next available run folder
         runLabel = sprintf('run-%02d', runNum);
-        dirs.run = fullfile(dirs.ses, 'beh', task, runLabel);
-        if ~exist(dirs.run, 'dir') % If folder doesn't exist, use it
-            mkdir(dirs.run);
+        baseName = sprintf('sub-%s_ses-%s_task-%s_run-%02d', subject, session, task, runNum);
+        logFileName = fullfile(dirs.beh, [baseName '_trials.tsv']);
+        if ~exist(logFileName, "file") % If trial file for this run doesn't exist doesn't exist, use the run umber
             break;
         end
         runNum = runNum + 1; % Otherwise increment run number
     end
     baseName = sprintf('sub-%s_ses-%s_task-%s_run-%02d', subject, session, task, runNum);
-    logFileName = fullfile(dirs.run, [baseName '_trials.tsv']);
-    metaFileName = fullfile(dirs.run, [baseName '_desc-meta.mat']);
+    logFileName = fullfile(dirs.beh, [baseName '_trials.tsv']);
+    metaFileName = fullfile(dirs.beh, [baseName '_desc-meta.mat']);
 end
 
 %% Load sentences and block randomization (with preallocation)
