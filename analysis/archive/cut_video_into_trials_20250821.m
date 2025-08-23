@@ -102,10 +102,19 @@ for irun = 1:nrunrows
         % if reencode_video is turned off, you may get A-V desync issues
 
         %%% in ffmpeg command, the -y flag will overwrite pre-existing trial files
-        % in ffmpeg force re-encode reencode (should maintain rotation and avoid A/V desync)... slow option
-         ffmpeg_command = sprintf(...
-            'ffmpeg -y -i "%s" -ss %f -to %f -c:v libx264 -force_key_frames "expr:gte(t,0)" -c:a aac "%s"', ...
-            recording_file, time_trial_start, time_trial_end, trial_video_filename);
+        if runs.reencode_video(irun)
+
+            % re-encode video to avoid A/V desync issues - this was a problem when cutting subs pilot01 through 05
+            %%%% running while memory is limited may result in losing video and getting audio only in some trial videos
+           ffmpeg_command = sprintf(...
+             'ffmpeg -y -i "%s" -ss %f -to %f -map 0 -c:v libx264 -force_key_frames "expr:gte(t,0)" -c:a aac -avoid_negative_ts make_zero "%s"', ...
+             recording_file, time_trial_start, time_trial_end, trial_video_filename);
+
+        else % may produce desync issues
+           ffmpeg_command = sprintf(...
+                'ffmpeg -y -i "%s" -ss %f -to %f -c copy -metadata:s:v rotate=0  "%s"', ... 
+                recording_file, time_trial_start, time_trial_end, trial_video_filename);
+        end
 
         [status, cmdout] = system(ffmpeg_command);
     end
