@@ -73,14 +73,20 @@ else % analyzing on a local machine
             dirs.config   = fullfile(dirs.projrepo, 'config'); 
             dirs.derivatives = fullfile(dirs.data, 'der');
             
-        case {'677-GUE-WD-0013'} % Guenther Lab soundbooth computer
+        case {'677-GUE-WD-0013'} % Guenther Lab soundbooth desktop computer 
             dirs.projrepo = ['C:\ieeg_stut']; 
             dirs.spm = ['C:\speechres\spm12'];
             dirs.conn = ['C:\speechres\conn'];
             dirs.FLvoice  = ['C:\speechres\FLvoice'];
-            
             dirs.data = ['C:\ieeg_stut_data'];  % source data
 
+        case {'677-GUE-WL-0009'} % Guenther Lab SEQ laptop for use at CNC scanner
+            dirs.projrepo = 'C:\Users\splab\Documents\GitHub\ieeg_stut'; 
+            dirs.spm = 'C:\Users\splab\Documents\MATLAB\spm12'; 
+            dirs.conn = 'C:\Users\splab\Documents\conn'; 
+            dirs.psychtoolbox = 'C:\Users\splab\Documents\GitHub\Psychtoolbox-3\Psychtoolbox'; 
+            dirs.data = 'C:\Users\splab\Documents\ieeg_stut'; 
+            
         otherwise
             
             disp('Directory listings are not set up for this computer. Please check that your hostname is correct.');
