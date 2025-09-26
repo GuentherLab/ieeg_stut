@@ -19,10 +19,21 @@ pilot004	2	irani23	2	recording-orbit	0	0	0	0		lost matlab timing data... not sur
 pilot005	2	jackson20	1	recording-ipad	9	0	0	1		response sometimes comes a few sec after  tData.timingTrial(1)... use longer trial clip window
 pilot005	2	irani23	1	recording-ipad	0	0	0	1		lost matlab timing data... not sure what proper run number would be
 pilot005	2	irani23	2	recording-ipad	0	0	0	0		lost matlab timing data... not sure what proper run number would be
+pilot006	2	rtmri	1	recording-thinkpad	0	0	0	0	rtmri sentence	not jackson task... stim = non-personalized full passage broken into sentences
+pilot006	2	rtmri	2	recording-thinkpad	0	0	0	0	rtmri sentence	not jackson task... stim = non-personalized full passage broken into sentences
+pilot006	2	rtmri	3	recording-thinkpad	0	0	0	0	rtmri passage	read both full passages used for rtmri-sentence task
+pilot006	2	jackson20	10	recording-thinkpad	6	0	0	1		
+pilot006	2	irani23	4	recording-thinkpad	4	0	0	1	word-go	
+pilot006	2	irani23	6	recording-thinkpad	4	0	0	0	cue-word	
 pilot007	2	jackson20	1	recording-emeet	6	0	0	1	observed-delay	
 pilot007	2	jackson20	2	recording-emeet	6	0	0	0	unobserved-immediate	lost matlab timing data
 pilot007	2	jackson20	3	recording-emeet	6	0	0	1	unobserved-delay	
 pilot007	2	irani23	3	recording-emeet	4	0	0	1		
+pilot008	2	jackson20	1	recording-emeet	6	0	0	0	unobserved-delay	
+pilot008	2	jackson20	2	recording-emeet	6	0	0	0	unobserved-immediate	same answer list as jackson observed (run 3)....... overwrote beh timing files (video got saved)
+pilot008	2	jackson20	3	recording-emeet	6	0	1	1	observed-delay	
+pilot008	2	irani23		recording-emeet	4	0	0	0	word-go	
+pilot008	2	irani23	7	recording-emeet	4	0	1	1	cue-word	
 pilot009	2	jackson20	1	recording-emeet	6	0	0	0	unobserved-immediate	
 pilot009	2	jackson20	2	recording-emeet	5	0	0	1	unobserved-delay	
 pilot009	2	jackson20	3	recording-emeet	6	0	0	1	observed-delay	
@@ -36,4 +47,4 @@ pilot011	2	irani23	3	recording-emeet	5	0	0	1
 pilot012	2	jackson20	1	recording-emeet	4	0	0	1		
 pilot012	2	jackson20	2	recording-emeet	4	0	0	1		
 pilot012	2	irani23	2	recording-emeet	4	0	0	1		
-sap006	2	daf	1	recording-phone	12	1	0	0		
+sap006	2	daf	1	recording-phone	12	0	0	0		
