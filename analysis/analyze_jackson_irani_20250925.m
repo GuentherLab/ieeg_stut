@@ -7,7 +7,7 @@
  clear
  close all force
 
-sub_inds_to_analyze = 1:7; 
+sub_inds_to_analyze = 1:12; 
 
 figure_font_size = 25;
 
