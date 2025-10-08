@@ -15,7 +15,7 @@
 op.num_run_digits = 2; % must match the value used during data acquisition; usually 2 digits
 op.num_trials_digits = 3; % number of digits to include in trial number labels in filenames
 
-runs = readtable([dirs.projrepo, filesep, 'ieeg_stut_runs.tsv'],'FileType','text'); % load table of runs from all subs to cut into trial clips
+runs = readtable([dirs.projrepo, filesep, 'ieeg-stut-runs.tsv'],'FileType','text'); % load table of runs from all subs to cut into trial clips
 runs = runs(logical(runs.make_annot_tables),:); % only make scoring sheets for runs for which this table variable is true
 nrunrows = height(runs); 
 
