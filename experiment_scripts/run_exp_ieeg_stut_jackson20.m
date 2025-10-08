@@ -45,11 +45,11 @@ beepoffset = 0.100;
 op.preview_answer_to_subject = 0; % use for in-person jackson20 task
 % op.preview_answer_to_subject = 1; % use for remote session Answer-Question task or unobserved condition
     op.preview_answer_duration = 4; % duration of preview in sec
-    op.preview_question = 1; % if true, preview the question instead of the answer
+    op.preview_question = 0; % if true, preview the question instead of the answer
  
 % wait period between experimenter finishing question and playing of the GO beep and green screen
-op.anticipation_dur_sec = 3; % use for in-person jackson20 task
-% op.anticipation_dur_sec = 2; % use for remote session Answer-Question task
+% op.anticipation_dur_sec = 3; % use for in-person jackson20 task
+op.anticipation_dur_sec = 2; % use for remote session Answer-Question task
 % op.anticipation_dur_sec = 0.0; % use for unobserved
 
 show_mic_trace_figure = 0; % if false, make mic trace figure invisible
@@ -517,13 +517,13 @@ for itrial = 1:expParams.numTrials
     % print current and upcoming stimulus questions 
     % print trial number and total trials
     if itrial ~= expParams.numTrials % if not last trial
-        next_trial_string = ['\n      Next trials question/word will be:\n ''', trials_words.question{itrial+1}, ''' /// ''', trials_words.word{itrial+1}, ''''];
+        next_trial_string = ['\n      Next trials question/word will be:\n ''', trials_words.question{itrial+1}, ''' /// ''', trials_words.answer{itrial+1}, ''''];
     elseif itrial == expParams.numTrials % if last trial
         next_trial_string = '';
     end
     fprintf([...
         '\nThis trial''s stimulus question: ''', trials_words.question{itrial}, '''', ...
-        '\n      Answer = ''',trials_words.word{itrial}, '''',...
+        '\n      Answer = ''',trials_words.answer{itrial}, '''',...
         '\n      ........ Trial ', num2str(itrial), '/' num2str(expParams.numTrials), ', Run ', num2str(expParams.run), ...
         next_trial_string,...
         '\n      As you finish asking this trial''s question, please press Spacebar to start the ', num2str(op.anticipation_dur_sec), ' second anticipation period',...
@@ -534,7 +534,7 @@ for itrial = 1:expParams.numTrials
         if op.preview_question
             set(annoStr.Stim,'String',trials_words.question{itrial})            
         elseif ~op.preview_question
-            set(annoStr.Stim,'String',trials_words.word{itrial})
+            set(annoStr.Stim,'String',trials_words.answer{itrial})
         end
         set(annoStr.Stim,'FontSize', op.ortho_font_size); 
         set(annoStr.Stim,'Visible','on'); 
