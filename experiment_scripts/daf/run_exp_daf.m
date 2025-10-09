@@ -109,7 +109,7 @@ for k = 1:length(input_devices)
 end
 inIdx = input('INPUT device #: '); % User selects input device
 
-% if using focisrite on BML intraop rig, specify the correct audio driver
+% if using focusrite on BML intraop rig, specify the correct audio driver
 if strcmp(host,'BML-ALIENWARE2') && contains(input_devices{3},'Focusrite')
     reader = audioDeviceReader('SampleRate', op.audio_sample_rate, ...
         'SamplesPerFrame', op.audio_frame_size, ...

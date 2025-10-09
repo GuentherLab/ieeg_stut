@@ -58,7 +58,7 @@ else % analyzing on a local machine
             dirs.projrepo = 'D:\Task\ieeg_stut';
             dirs.spm = 'C:\Users\abush\Documents\GitHub\spm12';
             dirs.psychtoolbox = 'C:\Toolboxes\Psychtoolbox'; % for reference, don't need to add path
-            dirs.data = 'C:\ieeg_stut'; 
+            dirs.data = 'D:\DBS\sourcedata'; 
 
         case {'sam_laptop'} % Sam Hansen laptop
             beep off
