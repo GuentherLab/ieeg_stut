@@ -15,7 +15,7 @@
 op.num_run_digits = 2; % must match the value used during data acquisition; usually 2 digits
 op.num_trials_digits = 3; % number of digits to include in trial number labels in filenames
 
-runs = readtable([dirs.projrepo, filesep, 'ieeg_stut_runs.tsv'],'FileType','text'); % load table of runs from all subs to cut into trial clips
+runs = readtable([dirs.projrepo, filesep, 'ieeg-stut-runs.tsv'],'FileType','text'); % load table of runs from all subs to cut into trial clips
 runs = runs(logical(runs.make_annot_tables),:); % only make scoring sheets for runs for which this table variable is true
 nrunrows = height(runs); 
 
@@ -34,7 +34,7 @@ for irun = 1:nrunrows
     dirs.annot = [dirs.der_sub, filesep, 'annot']; 
 
     file_prepend = ['sub-',sub, '_ses-',num2str(ses), '_task-',task, '_run-',runstring,  '_']; 
-    beh_scoring_filepath = [dirs.annot, filesep, file_prepend, 'beh_scoring.tsv']; 
+    beh_scoring_filepath = [dirs.annot, filesep, file_prepend, 'beh-scoring.tsv']; 
     landmarks_filepath = [dirs.annot, filesep, file_prepend, 'landmarks.tsv']; 
 
         

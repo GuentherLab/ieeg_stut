@@ -70,7 +70,7 @@ vardefault('op',struct);
 % field_default('op','ses',1); 
 
 % op.sub = 'qqq'; 
-op.sub = 'pilot012'; 
+op.sub = 'pilot013'; 
 % op.sub = 'DM1049';
 % op.sub = 'sap006';  
 
