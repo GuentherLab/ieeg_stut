@@ -22,7 +22,7 @@ op.delay_dur = 0.; % Pause between fixation and sentence onset (seconds)
 op.text_stim_dur = 12.0; % Duration for which sentence is displayed and spoken (seconds)
 op.iti = 2.0; % Inter-trial interval (seconds)
 op.stim_font_size = 65; 
-op.stim_max_char_per_line = 38; % wrap text at this length
+op.stim_max_char_per_line = 38; % wrap text at this length  
 
 % delayOptions = [0, 100, 150, 200]; % DAF delay condoitions in ms
 delayOptions = [150]; % DAF delay conditions in ms (MAX IS 1000ms)
