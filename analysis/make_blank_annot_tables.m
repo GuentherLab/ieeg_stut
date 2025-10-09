@@ -34,7 +34,7 @@ for irun = 1:nrunrows
     dirs.annot = [dirs.der_sub, filesep, 'annot']; 
 
     file_prepend = ['sub-',sub, '_ses-',num2str(ses), '_task-',task, '_run-',runstring,  '_']; 
-    beh_scoring_filepath = [dirs.annot, filesep, file_prepend, 'beh_scoring.tsv']; 
+    beh_scoring_filepath = [dirs.annot, filesep, file_prepend, 'beh-scoring.tsv']; 
     landmarks_filepath = [dirs.annot, filesep, file_prepend, 'landmarks.tsv']; 
 
         
