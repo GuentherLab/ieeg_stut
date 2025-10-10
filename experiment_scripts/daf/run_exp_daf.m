@@ -8,7 +8,7 @@ AssertOpenGL; % Ensure Psychtoolbox is available
 
 %% Prompt for saving
 %saveData = input('Would you like to save session data and metadata? (y/n): ', 's');
-saveData='y'; % set for autosave
+saveData='y'; % set for autosavee
 doSave = strcmpi(saveData, 'y'); % Logical flag for saving
 
 %% Parameter settings
@@ -103,7 +103,8 @@ end
 
 %% Audio setup
 
-input_devices = getAudioDevices(audioDeviceReader); % List available audio input devices
+% List available audio input devices.... sometimes crashes matlab on intraop rig Alienware laptop 
+input_devices = getAudioDevices(audioDeviceReader); 
 for k = 1:length(input_devices)
     fprintf('%d: %s\n', k, input_devices{k});
 end
